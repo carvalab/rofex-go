@@ -1,0 +1,830 @@
+[
+  {
+    "type": "post",
+    "url": "/auth/getToken",
+    "title": "",
+    "version": "1.2.0",
+    "name": "GetToken",
+    "group": "Autenticacion",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "X-Username",
+            "description": "<p>example</p>"
+          },
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "X-Password",
+            "description": "<p>example</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Content-Type",
+          "content": "application/x-www-form-urlencoded",
+          "type": "String"
+        }
+      ]
+    },
+    "error": {
+      "fields": {
+        "Error 4xx": [
+          {
+            "group": "Error 4xx",
+            "optional": false,
+            "field": "UserNotFound",
+            "description": "<p>Usuario no encontrado.</p>"
+          }
+        ]
+      },
+      "examples": [
+        {
+          "title": "Ejemplo 1",
+          "content": "HTTP/1.1 404 Not Found\n{\n   \"error\": \"invalid_grant\",\n   \"error_description\": \"The user name or password is incorrect.\"\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./methods/auth/getToken.cs",
+    "groupTitle": "Autenticacion",
+    "sampleRequest": [
+      {
+        "url": "https://api.remarkets.primary.com.ar/auth/getToken"
+      }
+    ]
+  },
+  {
+    "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "optional": false,
+            "field": "varname1",
+            "description": "<p>No type.</p>"
+          },
+          {
+            "group": "Success 200",
+            "type": "String",
+            "optional": false,
+            "field": "varname2",
+            "description": "<p>With type.</p>"
+          }
+        ]
+      }
+    },
+    "type": "",
+    "url": "",
+    "version": "0.0.0",
+    "filename": "./apidoc/main.js",
+    "group": "E:\\apidoc prueba\\apidoc\\main.js",
+    "groupTitle": "E:\\apidoc prueba\\apidoc\\main.js",
+    "name": ""
+  },
+  {
+    "type": "get",
+    "url": "/rest/instruments/detail",
+    "title": "Detalle",
+    "version": "1.2.0",
+    "name": "detail",
+    "group": "Instrumentos",
+    "description": "<p>El método permite consultar información vinculada a un instrumento en particular.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "marketId",
+            "description": "<p>ID del Mercado para el cual se está consultando el instrumento. Valores permitidos: ROFEX.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "symbol",
+            "description": "<p>El símbolo del instrumento. Ejemplo: DODic20 - para el futuro de dólar con vencimiento Diciembre 2020</p>"
+          }
+        ]
+      }
+    },
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "X-Auth-Token",
+            "description": "<p>Token obtenido a partir de /auth/getToken</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Ejemplo 1",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\":\"OK\",\n    \"instruments\": {\n        \"segment\":{\n            \"marketSegmentId\":\"DDF\",\n            \"marketId\":\"ROFX\"\n        },\n        \"lowLimitPrice\":16.905,\n        \"highLimitPrice\":19.835,\n        \"minPriceIncrement\":0.001000,\n        \"minTradeVol\":1.000000,\n        \"maxTradeVol\":5000.000000,\n        \"tickSize\":1.000000,\n        \"maturityDate\":20211230,\n        \"contractMultiplier\":1000.000000,\n        \"instrumentId\":{\n            \"marketId\":\"ROFX\",\n            \"symbol\":\"DODic21\"\n        },\n        \"cficode\":\"FXXXSX\"\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./methods/instruments/detail.cs",
+    "groupTitle": "Instrumentos",
+    "sampleRequest": [
+      {
+        "url": "https://api.remarkets.primary.com.ar/rest/instruments/detail"
+      }
+    ]
+  },
+  {
+    "type": "get",
+    "url": "/rest/instruments/details",
+    "title": "Todos",
+    "version": "1.2.0",
+    "name": "details",
+    "group": "Instrumentos",
+    "description": "<p>Devuelve una lista con todos los instrumentos disponibles y una descripción detallada de cada uno de ellos. Para cada instrumento se devuelven datos de segmento, precio mínimo/máximo, vencimiento, etc.</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "X-Auth-Token",
+            "description": "<p>Token obtenido a partir de /auth/getToken</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Ejemplo 1",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\":\"OK\",\n    \"instruments\":[\n        {\n            \"segment\":{\n                \"marketSegmentId\":\"DDF\",\n                \"marketId\":\"ROFX\"\n            },\n            \"lowLimitPrice\":16.905,\n            \"highLimitPrice\":19.835,\n            \"minPriceIncrement\":0.001000,\n            \"minTradeVol\":1.000000,\n            \"maxTradeVol\":5000.000000,\n            \"tickSize\":1.000000,\n            \"maturityDate\":20211230,\n            \"contractMultiplier\":1000.000000,\n            \"instrumentId\":{\n                \"marketId\":\"ROFX\",\n                \"symbol\":\"DODic21\"\n            },\n            \"cficode\":\"FXXXSX\"\n        },\n        …\n    ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./methods/instruments/details.cs",
+    "groupTitle": "Instrumentos",
+    "sampleRequest": [
+      {
+        "url": "https://api.remarkets.primary.com.ar/rest/instruments/details"
+      }
+    ]
+  },
+  {
+    "type": "get",
+    "url": "/rest/order/allById",
+    "title": "Todos los Estados",
+    "version": "1.2.0",
+    "name": "allById",
+    "group": "Ordenes",
+    "description": "<p>Consulta que devuelve todos los estados por los que paso una orden que estén asociados a un request hecho al mercado. En el caso de un request de alta de orden devolverá todos los estados de la orden que se ingresó al mercado menos el del estado Cancelled ya este estado estará asociado a un request de cancelación y no de alta de orden</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "clOrdId",
+            "description": "<p>El ID del request que se hizo al Mercado, devuelto por la API de Ingreso y Cancelación de Orden. Ejemplo: user144720678549411</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "proprietary",
+            "description": "<p>ID que identifica al participante del mercado mediante el cual se hace el request. Este parámetro es siempre fijo para una cuenta. Valor: api</p>"
+          }
+        ]
+      }
+    },
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "X-Auth-Token",
+            "description": "<p>Token obtenido a partir de /auth/getToken</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Ejemplo 1",
+          "content": "HTTP/1.1 200 OK\n{\n  \"status\":\"OK\",\n  \"orders\":[\n  {\n    \"orderId\":null,\n    \"clOrdId\":\"user1145712381052053\",\n    \"proprietary\":\"api\",\n    \"accountId\":{\n    \"id\":\"10\"\n    },\n    \"instrumentId\":{\n    \"marketId\":\"ROFX\",\n    \"symbol\":\"DODic21\"\n    },\n    \"price\":18.540,\n    \"orderQty\":10,\n    \"ordType\":\"LIMIT\",\n    \"side\":\"BUY\",\n    \"timeInForce\":\"DAY\",\n    \"transactTime\":\"20160304-17:36:50\",\n    \"status\":\"PENDING_NEW\",\n    \"text\":\"Enviada\"\n  },\n   {\n    \"orderId\":\"1130835\",\n    \"clOrdId\":\"user1145712381052053\",\n    \"proprietary\":\"api\",\n    \"execId\":\"160229133429-fix1-493\",\n    \"accountId\":{\n    \"id\":\"10\"\n    },\n    \"instrumentId\":{\n    \"marketId\":\"ROFX\",\n    \"symbol\":\"DODic21\"\n    },\n    \"price\":18.540,\n    \"orderQty\":10,\n    \"ordType\":\"LIMIT\",\n    \"side\":\"BUY\",\n    \"timeInForce\":\"DAY\",\n    \"transactTime\":\"20160304-17:37:35\",\n    \"avgPx\":0,\n    \"lastPx\":0,\n    \"lastQty\":0,\n    \"cumQty\":0,\n    \"leavesQty\":10,\n    \"status\":\"NEW\",\n    \"text\":\"Aceptada \"\n  }\n ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./methods/order/allById.cs",
+    "groupTitle": "Ordenes",
+    "sampleRequest": [
+      {
+        "url": "https://api.remarkets.primary.com.ar/rest/order/allById"
+      }
+    ]
+  },
+  {
+    "type": "get",
+    "url": "/rest/order/byOrderId",
+    "title": "Estado por OrderId",
+    "version": "1.2.0",
+    "name": "byOrderId",
+    "group": "Ordenes",
+    "description": "<p>Consulta que devuelve el estado de una orden consultando por su OrderID. El OrderID va a estar asociado a un request de alta de orden (client order ID). Si se manda otro request para cancelar esa orden entonces también ese OrderID va a estar asociado al request de cancelación de orden (client order ID distinto al de alta de orden).</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "orderId",
+            "description": "<p>Número de orden. Ejemplo: 645746456</p>"
+          }
+        ]
+      }
+    },
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "X-Auth-Token",
+            "description": "<p>Token obtenido a partir de /auth/getToken</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Ejemplo 1",
+          "content": "HTTP/1.1 200 OK\n{\n \"status\":\"OK\",\n \"order\":{\n   \"orderId\":\"93454894\",\n   \"clOrdId\":\"260723557037947\",\n   \"proprietary\":\"api\",\n   \"execId\":\"T1644060\",\n   \"accountId\":{\n    \"id\":\"500\"\n   },\n   \"instrumentId\":{\n     \"marketId\":\"ROFX\",\n     \"symbol\":\"DOJun21\"\n   },\n   \"price\":21,\n   \"orderQty\":1,\n   \"ordType\":\"LIMIT\",\n   \"side\":\"BUY\",\n   \"timeInForce\":\"DAY\",\n   \"transactTime\":\"20180327-12:12:38\",\n   \"avgPx\":20.174,\n   \"lastPx\":20.174,\n   \"lastQty\":1,\n   \"cumQty\":1,\n   \"leavesQty\":0,\n   \"status\":\"FILLED\",\n    \"text\":\"Operada \"\n  }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./methods/order/byOrderId.cs",
+    "groupTitle": "Ordenes",
+    "sampleRequest": [
+      {
+        "url": "https://api.remarkets.primary.com.ar/rest/order/byOrderId"
+      }
+    ]
+  },
+  {
+    "type": "get",
+    "url": "/rest/order/cancelById",
+    "title": "Cancelar",
+    "version": "1.2.0",
+    "name": "cancelById",
+    "group": "Ordenes",
+    "description": "<p>Permite cancelar una orden ya ingresada al mercado.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "clOrdId",
+            "description": "<p>El ID del request que se hizo al Mercado, devuelto por la API de Ingreso y Cancelación de Orden. Ejemplo: user144720678549411</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "proprietary",
+            "description": "<p>ID que identifica al participante del mercado mediante el cual se hace el request. Este parámetro es siempre fijo para una cuenta. Valor: api</p>"
+          }
+        ]
+      }
+    },
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "X-Auth-Token",
+            "description": "<p>Token obtenido a partir de /auth/getToken</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Ejemplo 1",
+          "content": "HTTP/1.1 200 OK\n{\n\"status\":\"OK\",\n  \"order\":{\n  \"clientId\":\"user14473450286174Cnl5\",\n  \"proprietary\":\"api\"\n }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./methods/order/cancelById.cs",
+    "groupTitle": "Ordenes",
+    "sampleRequest": [
+      {
+        "url": "https://api.remarkets.primary.com.ar/rest/order/cancelById"
+      }
+    ]
+  },
+  {
+    "type": "get",
+    "url": "/rest/order/id",
+    "title": "Estado por clOrdID",
+    "version": "1.2.0",
+    "name": "clOrdId",
+    "group": "Ordenes",
+    "description": "<p>Método para consultar en qué estado se encuentra una orden que se ingresó. El ClientOrderID hace referencia al ID del request que se hace al mercado. Cuando se quiere dar de alta una orden en el mercado se hace un request de alta de orden que lleva asociado un Client Order ID específico, esto permite diferenciar distintos request que se hagan. Para el mercado un request de alta de orden y un request de cancelación de una orden son distintos aunque tengan asociada el mismo ID de orden, entonces tendríamos un client order ID al ingresar una orden y un client order ID distinto al cancelar esa orden y ambos van a estar asociados al mismo Order ID.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "clOrdId",
+            "description": "<p>El ID del request que se hizo al Mercado, devuelto por la API de Ingreso y Cancelación de Orden. Ejemplo: user144720678549411</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "proprietary",
+            "description": "<p>ID que identifica al participante del mercado mediante el cual se hace el request. Este parámetro es siempre fijo para una cuenta. Valor: api</p>"
+          }
+        ]
+      }
+    },
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "X-Auth-Token",
+            "description": "<p>Token obtenido a partir de /auth/getToken</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Ejemplo 1",
+          "content": "HTTP/1.1 200 OK\n {\n     \"status\":\"OK\",\n     \"order\":{\n     \"orderId\":\"1130835\",\n     \"clOrdId\":\"user1145712381052053\",\n     \"proprietary\":\"api\",\n     \"execId\":\"160229133429-fix1-493\",\n     \"accountId\":{\n      \"id\":\"10\"\n     },\n     \"instrumentId\":{\n     \"marketId\":\"ROFX\",\n     \"symbol\":\"DODic21\"\n     },\n     \"price\":18.000,\n     \"orderQty\":10,\n     \"ordType\":\"LIMIT\",\n     \"side\":\"BUY\",\n     \"timeInForce\":\"DAY\",\n     \"transactTime\":\"20160304-17:37:35\",\n     \"avgPx\":0,\n     \"lastPx\":0,\n     \"lastQty\":0,\n     \"cumQty\":0,\n     \"leavesQty\":10,\n     \"status\":\"NEW\",\n     \"text\":\"Aceptada \"\n }",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./methods/order/clOrdId.cs",
+    "groupTitle": "Ordenes",
+    "sampleRequest": [
+      {
+        "url": "https://api.remarkets.primary.com.ar/rest/order/id"
+      }
+    ]
+  },
+  {
+    "type": "get",
+    "url": "/rest/order/newSingleOrder",
+    "title": "Nueva",
+    "version": "1.2.0",
+    "name": "newSingleOrder",
+    "group": "Ordenes",
+    "description": "<p>Es la manera de enviar una orden al Mercado. Vale la pena aclarar que cuando se ingresa una orden hay que verificar si realmente se cargó la orden y no fue rechazada. La secuencia debería ser:</p> <ol> <li>Ingresar la orden a través de la API.</li> <li>Si la respuesta que recibo es un &quot;status&quot;:&quot;OK&quot;, entonces debería pedirle a la API el estado de la orden creada (utilizando el ID devuelto al ingresar la orden. Ej: &quot;clientId&quot;:&quot;user14472764…&quot;). En este momento la orden puede tener 2 estados: </br> 2.1. &quot;status&quot;:&quot;NEW&quot; = la orden se ingresó correctamente </br> 2.2. &quot;status&quot;:&quot;REJECTED&quot; = la orden fue rechazada. La razón se especifica en la respuesta.</li> </ol>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "marketId",
+            "description": "<p>El ID del Mercado en el que se va a cargar la orden. Valores permitidos: ROFEX.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "symbol",
+            "description": "<p>El símbolo del instrumento. Ejemplo: DODic20 - para el futuro de dólar con vencimiento Diciembre 2020</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Float",
+            "optional": false,
+            "field": "price",
+            "description": "<p>Precio de la orden. Ejemplo: 12.01</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "orderQty",
+            "description": "<p>Tamaño de la Orden. Ejemplo: 2400</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "ordType",
+            "description": "<p>Tipo de Orden. Valores permitidos: <br></p> <ol> <li>Limit</li> <li>Market</li> </ol>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "side",
+            "description": "<p>Orden de compra o de venta. Valores permitidos: <br></p> <ol> <li>Sell</li> <li>Buy</li> </ol>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "timeInForce",
+            "description": "<p>Modificador de la orden que define el lapso de tiempo en el que la orden estará activa, por defecto Day. Valores permitidos: <br></p> <ol> <li>Day: Orden solo valida por el día. Al cerrar la rueda se expira</li> <li>IOC: Immediate or Cancel</li> <li>FOK: Fill or Kill</li> <li>GTD: Good Till Date (Es necesario completar el campo expireDate).</li> </ol>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "account",
+            "description": "<p>Número de cuenta. Ejemplo: 30</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": false,
+            "field": "cancelPrevious",
+            "description": "<p>Parámetro opcional que indica si se cancelan todas las ordenes previas o no. Por defecto este valor es false. Solo disponible para ofertas enviadas a productos ROFEX.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": false,
+            "field": "iceberg",
+            "description": "<p>Parámetro opcional que indica el tipo de orden Iceberg. Por defecto este valor es false.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Date",
+            "optional": false,
+            "field": "expireDate",
+            "description": "<p>Parámetro opcional que indica la fecha de Vencimiento para ordenes GTD. Ejemplo: 20200720</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "displayQty",
+            "description": "<p>Parámetro opcional que indica la cantidad a divulgar para ordenes Iceberg.</p>"
+          }
+        ]
+      }
+    },
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "X-Auth-Token",
+            "description": "<p>Token obtenido a partir de /auth/getToken</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Ejemplo 1",
+          "content": "HTTP/1.1 200 OK\n{\n\"status\":\"OK\",\n \"order\":{\n  \"clientId\":\"user144727645060649\",\n  \"proprietary\":\"api\"\n }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Ejemplo 2",
+          "content": "HTTP/1.1 200 OK\n{\n\"status\":\"OK\",\n \"order\":{\n  \"clientId\":\"user125469825632595\",\n  \"proprietary\":\"api\"\n }\n}",
+          "type": "json"
+        },
+        {
+          "title": "Ejemplo 3",
+          "content": "HTTP/1.1 200 OK\n{\n\"status\":\"OK\",\n \"order\":{\n  \"clientId\":\"user156548752365489\",\n  \"proprietary\":\"api\"\n }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./methods/order/newSingleOrder.cs",
+    "groupTitle": "Ordenes",
+    "sampleRequest": [
+      {
+        "url": "https://api.remarkets.primary.com.ar/rest/order/newSingleOrder"
+      }
+    ]
+  },
+  {
+    "type": "get",
+    "url": "/rest/order/replaceById",
+    "title": "Reemplazar",
+    "version": "1.2.0",
+    "name": "replaceById",
+    "group": "Ordenes",
+    "description": "<p>Permite reemplazar una orden ingresada al mercado.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "clOrdId",
+            "description": "<p>El ID del request que se hizo al Mercado, devuelto por la API de Ingreso y Cancelación de Orden. Ejemplo: user144720678549411</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "proprietary",
+            "description": "<p>ID que identifica al participante del mercado mediante el cual se hace el request. Este parámetro es siempre fijo para una cuenta. Valor: api</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "orderQty",
+            "description": "<p>Tamaño a modificar de la Orden.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Float",
+            "optional": false,
+            "field": "price",
+            "description": "<p>Precio a modificar de la orden.</p>"
+          }
+        ]
+      }
+    },
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "X-Auth-Token",
+            "description": "<p>Token obtenido a partir de /auth/getToken</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Ejemplo 1",
+          "content": "HTTP/1.1 200 OK\n{\n\"status\":\"OK\",\n  \"order\":{\n  \"clientId\":\"user14473450286174\",\n  \"proprietary\":\"api\"\n }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./methods/order/replaceById.cs",
+    "groupTitle": "Ordenes",
+    "sampleRequest": [
+      {
+        "url": "https://api.remarkets.primary.com.ar/rest/order/replaceById"
+      }
+    ]
+  },
+  {
+    "type": "get",
+    "url": "/rest/marketdata/get",
+    "title": "Tiempo Real",
+    "version": "1.2.0",
+    "name": "get",
+    "group": "Precios",
+    "description": "<p>El método permiten acceder a precios en Tiempo Real sobre los instrumentos negociados en el mercado.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "marketId",
+            "description": "<p>ID del Mercado para el cual se está consultando el instrumento. Valores permitidos: ROFEX.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "symbol",
+            "description": "<p>El símbolo del instrumento. Ejemplo: DODic20 - para el futuro de dólar con vencimiento Diciembre 2020</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "List",
+            "optional": false,
+            "field": "entries",
+            "description": "<p>Información solicitada sobre el contrato. <br> Valores permitidos: BI: Bid OF: Offer LA: Last, último precio operado OP: Open, precio de apertura CL: Close, precio de cierre SE: Settlement OI: Open Interest Ejemplo: BI,OF,LA,OP,CL,SE,OI</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Integer",
+            "optional": false,
+            "field": "depth",
+            "description": "<p>Parámetro opcional que indica la profundidad del book que se desea recibir en la market data. Por defecto es 1.</p>"
+          }
+        ]
+      }
+    },
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "X-Auth-Token",
+            "description": "<p>Token obtenido a partir de /auth/getToken</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Ejemplo 1",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\":\"OK\",\n    \"marketData\": {\n        \"LA\":{ \"price\":18.010, \"size\":500 },\n        \"SE\":null,\n        \"BI\":[{\"price\":18.000, \"size\":25}],\n        \"OI\":null,\n        \"OF\":[{\"price\":18.050, \"size\":50}, {\"price\":1.110,\"size\":10}],\n        \"OP\":18.010,\n        \"CL\":null\n        }\n    \"depth\":2,\n    \"aggregated\":true\n    }\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./methods/marketdata/get.cs",
+    "groupTitle": "Precios",
+    "sampleRequest": [
+      {
+        "url": "https://api.remarkets.primary.com.ar/rest/marketdata/get"
+      }
+    ]
+  },
+  {
+    "type": "get",
+    "url": "/rest/data/getTrades",
+    "title": "Históricos",
+    "version": "1.2.0",
+    "name": "getTrades",
+    "group": "Precios",
+    "description": "<p>La permite obtener datos históricos de instrumentos del mercado.</p>",
+    "parameter": {
+      "fields": {
+        "Parameter": [
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "marketId",
+            "description": "<p>ID del Mercado para el cual se está consultando el instrumento. Valores permitidos: ROFEX.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "symbol",
+            "description": "<p>El símbolo del instrumento. Ejemplo: DODic20 - para el futuro de dólar con vencimiento Diciembre 2020</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "date",
+            "description": "<p>Fecha a consultar, formato: YYYY-MM-DD. Ejemplo: 2017-05-20</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "dateFrom",
+            "description": "<p>Fecha desde, formato: YYYY-MM-DD.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "dateTo",
+            "description": "<p>Fecha hasta, formato: YYYY-MM-DD.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "Boolean",
+            "optional": false,
+            "field": "external",
+            "description": "<p>Parámetro para consultar instrumentos de otros mercados, cuando se consulta por un instrumento de otro mercado el valor de este parámetro debe ser “true”. Parametro opcional.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "environment",
+            "description": "<p>Indica el entorno para cual se consultan los precios históricos. Para el ambiente de remarkets el parámetro debe ser “REMARKETS”.</p>"
+          }
+        ]
+      }
+    },
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "X-Auth-Token",
+            "description": "<p>Token obtenido a partir de /auth/getToken</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Ejemplo 1",
+          "content": "HTTP/1.1 200 OK\n{\n\"status\":\"OK\",\n\"symbol\":\"DOMay21\",\n\"market\":\"ROFX\",\n\"trades\":[\n   {\n   \"price\":15.77,\n   \"size\":125,\n   \"datetime\":\"2017-05-17 14:29:24.831\",\n   \"servertime\":1495031364831,\n   \"symbol\":\"DOMay21\"\n   },\n   {\n   \"price\":15.775,\n   \"size\":75,\n   \"datetime\":\"2017-05-17 14:35:40.152\",\n   \"servertime\":1495031740152,\n   \"symbol\":\"DOMay21\"\n   },\n   {\n   \"price\":15.76,\n   \"size\":325,\n   \"datetime\":\"2017-05-17 14:46:43.038\",\n   \"servertime\":1495032403038,\n   \"symbol\":\"DOMay21\"\n   },\n   {\n   \"price\":15.73,\n   \"size\":1000,\n   \"datetime\":\"2017-05-17 15:54:15.700\",\n   \"servertime\":1495036455700,\n   \"symbol\":\"DOMay21\"\n   }\n ]\n}",
+          "type": "json"
+        },
+        {
+          "title": "Ejemplo 2",
+          "content": "HTTP/1.1 200 OK\n{\n \"status\":\"OK\",\n \"symbol\":\"DOFeb21\",\n \"market\":\"ROFX\",\n \"trades\":[\n {\n \"price\":19.73,\n \"size\":139,\n \"datetime\":\"2017-01-01 14:29:24.831\",\n \"servertime\":1495031364831,\n \"symbol\":\"DOMay21\"\n },\n {\n \"price\":19.725,\n \"size\":10,\n \"datetime\":\"2017-01-01 14:35:40.152\",\n \"servertime\":1495031740152,\n \"symbol\":\"DOMay21\"\n },\n {\n \"price\":19.86,\n \"size\":330,\n \"datetime\":\"2017-01-08 12:46:43.038\",\n \"servertime\":14950123403038,\n \"symbol\":\"DOMay21\"\n },\n {\n \"price\":19.73,\n \"size\":1000,\n \"datetime\":\"2017-01-10 11:54:15.700\",\n \"servertime\":1495123455700,\n \"symbol\":\"DOMay21\"\n }\n ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./methods/marketdata/getTrades.cs",
+    "groupTitle": "Precios",
+    "sampleRequest": [
+      {
+        "url": "https://api.remarkets.primary.com.ar/rest/data/getTrades"
+      }
+    ]
+  },
+  {
+    "type": "get",
+    "url": "/rest/segment/all",
+    "title": "Todos",
+    "version": "1.2.0",
+    "name": "Segments",
+    "group": "Segmentos",
+    "description": "<p>Este método nos devuelve una lista con todos los segmentos. Los segmentos son los distintos ambientes o ruedas de negociación en las que está organizada la operatoria de Matba Rofex. Algunos de los segmentos que existen hoy en día son: <br>✔ DDF (Instrumentos de la División Derivados Financieros) <br>✔ DDA (Instrumentos de la División Derivados Agropecuarios) <br>✔ DUAL (Instrumentos listados en ambas divisiones)</p>",
+    "header": {
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "String",
+            "optional": false,
+            "field": "X-Auth-Token",
+            "description": "<p>Token obtenido a partir de /auth/getToken</p>"
+          }
+        ]
+      }
+    },
+    "success": {
+      "examples": [
+        {
+          "title": "Ejemplo 1",
+          "content": "HTTP/1.1 200 OK\n{\n    \"status\":\"OK\",\n    \"segments\":[\n        {\n            \"marketSegmentId\":\"DDA\",\n            \"marketId\":\"ROFX\"\n        },\n        {\n            \"marketSegmentId\":\"DDF\",\n            \"marketId\":\"ROFX\"\n        }\n    ]\n}",
+          "type": "json"
+        }
+      ]
+    },
+    "filename": "./methods/segments/segments.cs",
+    "groupTitle": "Segmentos",
+    "sampleRequest": [
+      {
+        "url": "https://api.remarkets.primary.com.ar/rest/segment/all"
+      }
+    ]
+  }
+]

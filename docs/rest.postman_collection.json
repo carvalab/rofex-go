@@ -1,0 +1,989 @@
+{
+	"info": {
+		"_postman_id": "87ba2785-857c-41b8-b9f6-bccb5cdf85e6",
+		"name": "Primary API Trading - REST",
+		"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\" width=\"75%\">\n\n### **¡¿Te gustan nuestras APIs?!**\n\n#### ¡Votanos! :)\n\nEstamos participando del The Postman Developers' Choice Awards :)\n\nTu voto nos ayudaría un montón! Clickea el link de abajo y votanos con tu usuario de Postman\n\n[https://www.postman.com/mtr-pmy?utm_campaign=developers_choice_2025&amp;utm_source=publisher&amp;utm_medium=link&amp;utm_term=5150582](https://www.postman.com/mtr-pmy?utm_campaign=developers_choice_2025&utm_source=publisher&utm_medium=link&utm_term=5150582)\n\n<img src=\"https://content.pstmn.io/78662186-7dd4-4cc4-b32c-b572596d6179/aW1hZ2UucG5n\" width=\"617\" height=\"363\">\n\n<h1>Trading API (protocolo REST)</h1>\n\n<p>Permite obtener MarketData histórica y en tiempo real. También permite enviar ofertas al mercado, conocer el reporte de una cuenta y posiciones de una cuenta comitente.</p>\n\n<h3>Protocolos disponibles:</h3>\n\n<ul><li><div><b>REST</b></div></li><li><div>WebSocket</div></li><li><div>FIX</div></li></ul>\n\n<h3>Documentación:</h3>\n\n<a href=\"https://apihub.primary.com.ar/assets/docs/Primary-API.pdf\">https://apihub.primary.com.ar/assets/docs/Primary-API.pdf</a>\n\n<h3>Buenas prácticas recomendadas:</h3>\n\n<a href=\"https://apihub.primary.com.ar/assets/docs/Buenas%20practicas%20TRD.pdf\">Buenas prácticas</a>\n\n<h3>reMarkets (entorno de pruebas):</h3>\n\n<a href=\"https://remarkets.primary.ventures\">https://remarkets.primary.ventures/</a>\n\n<p>Para crear un usuario en el entorno de pruebas, deberás dirigirte al sitio web de reMarkets y autenticarte. Una vez logueado, en la pestaña \"Mi cuenta\" estarán tus credenciales de acceso a todas las plataformas disponibles en este entorno.</p>\n\n<h3>Repositorio de Github</h3>\n\n<a href=\"https://github.com/matbarofex/\">https://github.com/matbarofex/</a>\n\n<p>En nuestro repositorio de Github podrás encontrar ejemplos de conectores a nuestra API REST/WS en distintos lenguajes de programación.</p>\n\n<h3>Webinars</h3>\n\n<a href=\"https://www.youtube.com/playlist?list=PLXOHBCQRtT01c_HvVYxpAlvCmmpx3Izz_\">Youtube</a>\n\n<h3>APIDoc</h3>\n\n<a href=\"https://apihub.primary.com.ar/assets/apidoc/trading/index.html\">https://apihub.primary.com.ar/assets/apidoc/trading/index.html</a>\n\n<h3>Cliente WebSocket</h3>\n\n<a href=\"https://api.remarkets.primary.com.ar/marketdata.html\">https://api.remarkets.primary.com.ar/marketdata.html</a>\n\n<h3>Preguntas frecuentes</h3>\n\n<table><tbody><tr><td><div><b>Pregunta</b></div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td><td><div><b>Respuesta</b></div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td></tr><tr><td><div>Una vez que tengo mi desarrollo testeado en reMarkets, cómo puedo migrarlo a producción?</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td><td><div>Deberías escribir un correo a mpi@primary.com.ar indicando en detalle lo que implementaste, los métodos que utilizaste y la frecuencia de consulta de cada uno. MPI coordinará contigo una fecha para poder homologar la implementación.</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td></tr><tr><td><div>Es necesario tener en cuenta las buenas prácticas al momento de integrar la API?</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td><td><div>Sí! Ya que vas a estar incorporando un consumo óptimo, que ayudará a mantener la plataforma sin inconvenientes.</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td></tr><tr><td><div>En qué consiste el proceso de homologación?</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td><td><div>La homologación consiste en una serie de pruebas, donde te pediremos ejecutar tu implementación para evaluar que el consumo que realiza a la API es óptimo y respeta las buenas prácticas recomendadas.</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td></tr><tr><td><div>¿Qué costo tiene el uso de la API?</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td><td><div>La API no tiene costo! Sólo precisas de credenciales productivas, y para eso deberás homologar la implementación.</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td></tr></tbody></table>\n\nTime in Forces disponibles en la API:\n\n<table><tbody><tr><td><div>DAY</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td><td><div>Las órdenes cuyo TIF es DAY, se cancelan si la orden no se completa antes del cierre del día de negociación.<br></div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td></tr><tr><td><div>IOC</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td><td><div>Las órdenes IOC (Immediate-or-Cancel) estipulan que cualquier parte de la orden que no se complete de forma inmediata deberá ser cancelada.<br></div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td></tr><tr><td><div>FOK</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td><td><div>Las órdenes FOK (Fill-or-Kill) o bien se completan de forma inmediata (fill), o se cancelan (kill)<br></div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td></tr><tr><td><div>GTD</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td><td><div>Las órdenes GTD permiten especificar una fecha específica en la que vencerá la orden</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td></tr></tbody></table>\n\nTipos de órdenes disponibles en la API:\n\n<table><tbody><tr><td><div>LIMIT</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td><td><div>Las órdenes límite te permiten especificar el precio mínimo al que deseas vender o el máximo al que deseas comprar.<br></div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td></tr><tr><td><div>MARKET</div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td><td><div>Las órdenes Market se ejecutan al precio de mercado<br></div><div contenteditable=\"false\"><div><div><div></div></div></div><div></div></div></td></tr></tbody></table>\n\nCualquier consulta que tengas, estamos a disposición para ayudarte, no dudes en enviar tu consulta a la casilla\n\n<a href=\"mailto:​mpi@primary.com.ar\">mpi@primary.com.ar</a>\n\n**Equipo MPI.**",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1714399",
+		"_collection_link": "https://www.postman.com/mtr-pmy/primary/collection/s56nyis/primary-api-trading-rest?action=share&source=collection_link&creator=1714399"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Autenticación | Obtener el token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(pm.response.code == 200)\r",
+									"{\r",
+									"    var token  = pm.response.headers.get(\"X-Auth-Token\")\r",
+									"    pm.collectionVariables.set(\"token\",token);\r",
+									"    pm.collectionVariables.set(\"usuario\", pm.request.headers.get(\"X-Username\"))\r",
+									"    pm.collectionVariables.set(\"clave\", pm.request.headers.get(\"X-Password\"))\r",
+									"    pm.environment.set(\"tokenWS\", token);\r",
+									"\r",
+									"    const requestOptions = \r",
+									"    {\r",
+									"        url: 'https://api.remarkets.primary.com.ar/rest/accounts',\r",
+									"        method: 'GET',\r",
+									"        header: \r",
+									"        {\r",
+									"            'Content-Type': 'application/json',\r",
+									"            'X-Auth-Token': pm.collectionVariables.get(\"token\")\r",
+									"        }\r",
+									"    }\r",
+									"    pm.sendRequest(requestOptions, function (err, response) {\r",
+									"        if(response.code == 200)\r",
+									"        {\r",
+									"            var data = response.json();\r",
+									"            console.log(data);\r",
+									"            var account  = data.accounts[0].name;\r",
+									"            pm.collectionVariables.set(\"cuenta\",account);\r",
+									"            console.log(pm.collectionVariables.get(\"cuenta\"))\r",
+									"        }\r",
+									"    });\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Username",
+								"value": "_usuario_remarkets_",
+								"type": "text"
+							},
+							{
+								"key": "X-Password",
+								"value": "_clave_remarkets_",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/auth/getToken",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"auth",
+								"getToken"
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\">\n\n<h3>Método:</h3>\n\ngetToken\n\n<h3>Descripción</h3>\n\nAntes de realizar cada request, es necesario autenticarse en la API. Para eso, la API provee un método de autenticación vía Token, **dicho token es único para cada usuario, dura 24 hs y no cambia.**\n\n<h3>Mejores prácticas de consumo</h3>\n\n<h5>Buena práctica:</h5>\n\n1 request REST/día\n\n<h5>Justificación:</h5>\n\nDado que el token dura 24 hs, solicitándolo una vez por día es suficiente para poder consultar la API.  \nEl token dura 24 hs."
+					},
+					"response": []
+				}
+			],
+			"description": "<h2>Autenticación</h2>\n\n<h3>reMarkets (entorno de pruebas):</h3>\n\n<a href=\"https://remarkets.primary.ventures\">https://remarkets.primary.ventures/</a>\n\n<p>Para crear un usuario en el entorno de pruebas, deberás dirigirte al sitio web de reMarkets y autenticarte. Una vez logueado, en la pestaña \"Mi cuenta\" estarán tus credenciales de acceso a todas las plataformas disponibles en este entorno.</p>"
+		},
+		{
+			"name": "Instruments",
+			"item": [
+				{
+					"name": "Segmentos disponibles",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/segment/all",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"segment",
+								"all"
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\nsegment/all  \n  \n\n<h3>Descripción</h3>\n\nPermite obtener los segmentos disponibles en el mercado.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\n1 request REST/día  \n\n<h5>Justificación:</h5>\n\n  \nDado que la lista de segmentos no cambia durante el día, debe consultarse una única vez."
+					},
+					"response": []
+				},
+				{
+					"name": "Listado de instrumentos resumido",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/instruments/all",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"instruments",
+								"all"
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\ninstruments/all  \n  \n\n<h3>Descripción</h3>\n\nPermite obtener la lista de instrumentos de forma resumida.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\n1 request REST/día  \n\n<h5>Justificación:</h5>\n\nDado que la lista de instrumentos no sufre cambios drásticos durante la sesión de negociación, se debe consumirlo hasta una vez cada 4 horas."
+					},
+					"response": []
+				},
+				{
+					"name": "Listado de instrumentos detallado",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/instruments/details",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"instruments",
+								"details"
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\ninstruments/details  \n  \n\n<h3>Descripción</h3>\n\nPermite obtener la lista de instrumentos de forma detallada.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\n1 request REST/día  \n\n<h5>Justificación:</h5>\n\nDado que la lista de instrumentos no cambia durante el día, debe consultarse una única vez"
+					},
+					"response": []
+				}
+			],
+			"description": "<h2>Instrumentos</h2>"
+		},
+		{
+			"name": "Market Data",
+			"item": [
+				{
+					"name": "Obtener MarketData",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/marketdata/get?marketId=ROFX&symbol=DLR/DIC21&entries=BI,OF,OI,LA,SE&depth=2",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"marketdata",
+								"get"
+							],
+							"query": [
+								{
+									"key": "marketId",
+									"value": "ROFX",
+									"description": "Siempre es ROFX"
+								},
+								{
+									"key": "symbol",
+									"value": "DLR/DIC21",
+									"description": "Símbolo del instrumento"
+								},
+								{
+									"key": "entries",
+									"value": "BI,OF,OI,LA,SE",
+									"description": "Entries a consultar (revisar documentación)"
+								},
+								{
+									"key": "depth",
+									"value": "2",
+									"description": "Profundidad de MarketData"
+								}
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n  \n/marketdata/get  \n  \n\n<h3>Descripción</h3>\n\nPermite consultar las cotizaciones en tiempo real para cada instrumento\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5><ul><li><p><br>Hasta 1 request REST / segundo para consulta de cierres.<br></p></li><li><p><br>Suscribirse por WebSocket para información en realtime.<br></p></li></ul><h5>Justificación:</h5><ul><li><p><br>Si se quiere obtener información de cierre, debe hacerse a última hora.<br></p></li><li><p><br>Si se quiere obtener información en tiempo real, debe suscribirse a través de WebSocket.<br></p></li></ul>\n\n**Entries disponibles :**\n\n<p><br><br><br><br><br></p><p><br><br></p><table><tbody><tr><td>Simbolo</td><td>Significado</td><td>Descripcion</td></tr><tr><td>BI</td><td>BIDS</td><td>Mejor oferta de compra en el book</td></tr><tr><td>OF</td><td>OFFERS</td><td>Mejor oferta de venta en el book</td></tr><tr><td>LA</td><td>LAST</td><td>Último precio operado en el mercado</td></tr><tr><td>OP</td><td>OPENING PRICE</td><td>Precio de apertura</td></tr><tr><td>CL</td><td>CLOSING PRICE</td><td>Precio de cierre</td></tr><tr><td>SE</td><td>SETTLEMENT PRICE</td><td>Precio de ajuste (solo para futuros)</td></tr><tr><td>HI</td><td>TRADING SESSION HIGH PRICE</td><td>Precio máximo de la rueda</td></tr><tr><td>LO</td><td>TRADING SESSION LOW PRICE</td><td>Precio mínimo de la rueda</td></tr><tr><td>TV</td><td>TRADE VOLUME</td><td>Volumen Operado en contratos/nominales para ese security</td></tr><tr><td>OI</td><td>OPEN INTEREST</td><td>Interés abierto (solo para futuros)</td></tr><tr><td>IV</td><td>INDEX VALUE</td><td>Valor del indice (solo para índices)</td></tr><tr><td>EV</td><td>TRADE EFFECTIVE VOLUME</td><td>Volumen efectivo de negociación para ese security</td></tr><tr><td>NV</td><td>NOMINAL VOLUME</td><td>Volumen nominal de negociación para ese security</td></tr></tbody></table>"
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar los trades realizados para un contrato Matba Rofex en un rango de fechas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/data/getTrades?marketId=ROFX&symbol=DODic21&dateFrom=2021-05-26&dateTo=2021-05-29&external=false",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"data",
+								"getTrades"
+							],
+							"query": [
+								{
+									"key": "marketId",
+									"value": "ROFX",
+									"description": "Valores posibles:\nROFX = Matba Rofex\nMERV = ByMA"
+								},
+								{
+									"key": "symbol",
+									"value": "DODic21",
+									"description": "Instrumento a consultar"
+								},
+								{
+									"key": "dateFrom",
+									"value": "2021-05-26",
+									"description": "Fecha desde"
+								},
+								{
+									"key": "dateTo",
+									"value": "2021-05-29",
+									"description": "Fecha hasta"
+								},
+								{
+									"key": "external",
+									"value": "false",
+									"description": "Valores posibes:\nfalse = instrumentos Matba Rofex\ntrue = tickers ByMA"
+								}
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/data/getTrades  \n  \n\n<h3>Descripción</h3>\n\nPermite consultar las operaciones realizadas para un contrato, en un día particular o un rango de fechas\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\n1 request REST / 30 segundos  \n  \n\n<h5>Justificación:</h5>\n\nEl método actualiza su información cada 30 segundos."
+					},
+					"response": []
+				}
+			],
+			"description": "<h2>Datos de Mercado</h2>"
+		},
+		{
+			"name": "Order Routing",
+			"item": [
+				{
+					"name": "Enviar una orden al mercado",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if(pm.response.code == 200)\r",
+									"{\r",
+									"    var details = pm.response.json();\r",
+									"    var clientId = details.order.clientId;\r",
+									"    var proprietary = details.order.proprietary;\r",
+									"    pm.collectionVariables.set(\"last_send_order_clientId\", clientId);\r",
+									"    pm.collectionVariables.set(\"last_send_order_proprietary\", proprietary);\r",
+									"    console.log(pm.collectionVariables.get(\"last_send_order_clientId\") + \" | \" + pm.collectionVariables.get(\"last_send_order_proprietary\"));\r",
+									"    const requestOptions = \r",
+									"    {\r",
+									"        url: 'https://api.remarkets.primary.com.ar/rest/order/allById?clOrdId='+clientId+'&proprietary='+ proprietary,\r",
+									"        method: 'GET',\r",
+									"        header: \r",
+									"        {\r",
+									"            'Content-Type': 'application/json',\r",
+									"            'X-Auth-Token': pm.collectionVariables.get(\"token\")\r",
+									"        }\r",
+									"    }\r",
+									"    pm.sendRequest(requestOptions, function (err, response) {\r",
+									"        if(response.code == 200)\r",
+									"        {\r",
+									"            var data = response.json();\r",
+									"            console.log(data);\r",
+									"        }\r",
+									"    });\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/order/newSingleOrder?marketId=ROFX&symbol=DLR/MAR22&account={{cuenta}}&side=BUY&price=78&orderQty=20&ordType=LIMIT&timeInForce=DAY",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"order",
+								"newSingleOrder"
+							],
+							"query": [
+								{
+									"key": "marketId",
+									"value": "ROFX",
+									"description": "Siempre es ROFX"
+								},
+								{
+									"key": "symbol",
+									"value": "DLR/MAR22",
+									"description": "Instrumento a operar"
+								},
+								{
+									"key": "account",
+									"value": "{{cuenta}}",
+									"description": "Cuenta comitente que enviará la orden al mercado"
+								},
+								{
+									"key": "side",
+									"value": "BUY",
+									"description": "Lado de la orden"
+								},
+								{
+									"key": "price",
+									"value": "78",
+									"description": "Precio de la orden"
+								},
+								{
+									"key": "orderQty",
+									"value": "20",
+									"description": "Cantidad de la orden"
+								},
+								{
+									"key": "ordType",
+									"value": "LIMIT",
+									"description": "Tipo de orden"
+								},
+								{
+									"key": "timeInForce",
+									"value": "DAY",
+									"description": "TIF de la orden"
+								}
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/order/newSingleOrder  \n  \n\n<h3>Descripción</h3>\n\nPermite enviar una orden al mercado.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\nEnviarlas vía API WebSocket  \n\n<h5>Justificación:</h5>\n\nPara algoritmos, o si se desea enviar órdenes de forma masiva, recomendamos enviarlas a través de una conexión por WebSocket"
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar el estado de una orden por ClOrderId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/order/id?clOrdId={{last_send_order_clientId}}&proprietary={{last_send_order_proprietary}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"order",
+								"id"
+							],
+							"query": [
+								{
+									"key": "clOrdId",
+									"value": "{{last_send_order_clientId}}"
+								},
+								{
+									"key": "proprietary",
+									"value": "{{last_send_order_proprietary}}"
+								}
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/order/id  \n  \n\n<h3>Descripción</h3>\n\nPermite consultar el estado de una orden por clOrderId\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\nSuscribirse por WebSocket.  \n  \n\n<h5>Justificación:</h5>\n\nPara mantener el rendimiento de la plataforma, es necesario que el usuario se suscriba por WebSocket, a las actualizaciones de estado de sus órdenes."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar todos los estados por ClientID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/order/allById?clOrdId={{last_send_order_clientId}}&proprietary={{last_send_order_proprietary}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"order",
+								"allById"
+							],
+							"query": [
+								{
+									"key": "clOrdId",
+									"value": "{{last_send_order_clientId}}",
+									"description": "Último clOrdId de la orden"
+								},
+								{
+									"key": "proprietary",
+									"value": "{{last_send_order_proprietary}}",
+									"description": "Propietario de la orden"
+								}
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/order/allById  \n  \n\n<h3>Descripción</h3>\n\nPermite obtener todos los estados por los que pasó una orden, el parámetro clOrdId corresponde al último Client Order Id por los que pasó una orden. Cada ClOrdId corresponde a una acción por la que haya pasado una orden. Es decir, si la orden se ejecuta parcial o completamente, por ejemplo, cambia el clOrdId. Al momento de modificar o consultar el estado de una orden, se debe enviar el último clOrdId generado.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\n  \n1 request REST / 30 segundos  \n  \n\n<h5>Justificación:</h5>\n\n  \nSi se desea tener aún más actualizada esta información, recomendamos suscribirse por WebSocket a las actualizaciones de estado de sus órdenes."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar el estado de una orden por orderId",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/order/byOrderId?orderId=209116015",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"order",
+								"byOrderId"
+							],
+							"query": [
+								{
+									"key": "orderId",
+									"value": "209116015",
+									"description": "El orderId de la orden a consultar"
+								}
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/order/byOrderId  \n  \n\n<h3>Descripción</h3>\n\nPermite conocer el estado de una orden por orderId.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\n  \nSuscribirse por WebSocket  \n  \n\n<h5>Justificación:</h5>\n\nPara mantener el rendimiento de la plataforma, es necesario que el usuario se suscriba por WebSocket, a las actualizaciones de estado de sus órdenes."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar el último estado de los request(clOrderId) asociadas a una cuenta",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/order/all?accountId={{cuenta}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"order",
+								"all"
+							],
+							"query": [
+								{
+									"key": "accountId",
+									"value": "{{cuenta}}"
+								}
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/order/all  \n  \n\n<h3>Descripción</h3>\n\nPermite obtener el último estado de los request (client order ID) asociadas a una cuenta.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\nSuscribirse por WebSocket  \n  \n\n<h5>Justificación:</h5>\n\nPara mantener el rendimiento de la plataforma, es necesario que el usuario se suscriba por WebSocket, a las actualizaciones de estado de sus órdenes."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar estado de una orden por ExecId (ExecutionID)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/order/byExecId?execId=",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"order",
+								"byExecId"
+							],
+							"query": [
+								{
+									"key": "execId",
+									"value": "",
+									"description": "ExecId de la orden a consultar"
+								}
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/order/byExecId  \n  \n\n<h3>Descripción</h3>\n\nConsulta que devuelve el estado de la orden (por Execution ID), para identificar qué orden está involucrada en la respectiva operación.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\n1 request REST / 30 segundos  \n\n<h5>Justificación:</h5>\n\nPara mantener el rendimiento de la plataforma."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar las órdenes operadas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/order/filleds?accountId={{cuenta}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"order",
+								"filleds"
+							],
+							"query": [
+								{
+									"key": "accountId",
+									"value": "{{cuenta}}"
+								}
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\">\n\n<h3>Método:</h3>\n\n/order/filleds\n\n<h3>Descripción</h3>\n\nConsulta que devuelve todas las órdenes operadas en el día, de la cuenta especificada en el parámetro accountId.\n\n<h3>Mejores prácticas de consumo</h3>\n\n<h5>Buena práctica:</h5>\n\n1 request REST / 30 segundos\n\n<h5>Justificación:</h5>\n\nPara mantener el rendimiento de la plataforma."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar las órdenes activas",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/order/actives?accountId={{cuenta}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"order",
+								"actives"
+							],
+							"query": [
+								{
+									"key": "accountId",
+									"value": "{{cuenta}}"
+								}
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/order/byExecId  \n  \n\n<h3>Descripción</h3>\n\nConsulta que devuelve el estado de la orden (por Execution ID), para identificar qué orden está involucrada en la respectiva operación.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\n1 request REST / 30 segundos  \n\n<h5>Justificación:</h5>\n\nPara mantener el rendimiento de la plataforma."
+					},
+					"response": []
+				},
+				{
+					"name": "Reemplazar una orden",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "D0iPoLlxVWxYyFe3hlba3f3JwjwKRSjxYi6cRxmh6Hc=",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/order/replaceById?clOrdId=client_order_id&proprietary=PBCP&orderQty=3&price=72",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"order",
+								"replaceById"
+							],
+							"query": [
+								{
+									"key": "clOrdId",
+									"value": "client_order_id",
+									"description": "Último clOrdId de la orden a modificar"
+								},
+								{
+									"key": "proprietary",
+									"value": "PBCP",
+									"description": "Propietario de la orden a modificar"
+								},
+								{
+									"key": "orderQty",
+									"value": "3",
+									"description": "Cantidad por la que se modificará la orden"
+								},
+								{
+									"key": "price",
+									"value": "72",
+									"description": "Precio por el que se modificará la orden"
+								}
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/order/replaceById  \n  \n\n<h3>Descripción</h3>\n\nPermite modificar una orden.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\n1 request REST / segundo  \n\n<h5>Justificación:</h5>\n\nPara no afectar el rendimiento de la plataforma."
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelar una orden",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "LaIXnTGmdk1umgqUw2SFtKeuzg5uJ9kXK/cBCBpNGe0=",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/order/cancelById?clOrdId=client_order_id&proprietary=PBCP",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"order",
+								"cancelById"
+							],
+							"query": [
+								{
+									"key": "clOrdId",
+									"value": "client_order_id",
+									"description": "Último clOrdId de la orden a cancelar"
+								},
+								{
+									"key": "proprietary",
+									"value": "PBCP",
+									"description": "Propietario de la orden a cancelar"
+								}
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/order/cancelById  \n  \n  \n\n<h3>Descripción</h3>\n\nPermite cancelar una orden.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5><ul><li><p><br>1 request REST / segundo<br></p></li><li><p><br>Cancelarlas por WebSocket<br></p></li></ul><h5>Justificación:</h5>\n\nSi se opera a través de algoritmos, las cancelaciones deben enviarse a través de WebSocket o FIX."
+					},
+					"response": []
+				}
+			],
+			"description": "<h2>Envío y consulta de órdenes</h2>"
+		},
+		{
+			"name": "Account",
+			"item": [
+				{
+					"name": "Consultar las cuentas asociadas a un usuario",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/accounts",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"accounts"
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/accounts  \n  \n\n<h3>Descripción</h3>\n\nPermite obtener las cuentas asociadas al usuario autenticado. Es útil para los usuarios que tienen más de una cuenta asociada.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\n1 request REST/minuto  \n\n<h5>Justificación:</h5>\n\nPara mantener la estabilidad de la plataforma."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar el reporte de una cuenta",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/risk/accountReport/{{cuenta}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"risk",
+								"accountReport",
+								"{{cuenta}}"
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/risk/accountReport/  \n  \n\n<h3>Descripción</h3>\n\nPermite consultar el reporte de una cuenta comitente.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\n  \n1 request REST / 5 segundos  \n  \n  \n\n<h5>Justificación:</h5>\n\nLa información en este método se actualiza 1 vez cada 5 segundos."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar el reporte de posición de una cuenta",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/risk/position/getPositions/{{cuenta}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"risk",
+								"position",
+								"getPositions",
+								"{{cuenta}}"
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/risk/position/getPositions  \n  \n\n<h3>Descripción</h3>\n\nPermite consultar la posición de la cuenta de forma resumida.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\n1 request REST / 5 segundos  \n\n<h5>Justificación:</h5>\n\nPara mantener la estabilidad de la plataforma."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar el reporte detallado de la posición de una cuenta",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Auth-Token",
+								"value": "{{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.remarkets.primary.com.ar/rest/risk/detailedPosition/{{cuenta}}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"remarkets",
+								"primary",
+								"com",
+								"ar"
+							],
+							"path": [
+								"rest",
+								"risk",
+								"detailedPosition",
+								"{{cuenta}}"
+							]
+						},
+						"description": "<img src=\"https://apihub.primary.com.ar/assets/img/primarylogo.jpg\"><h3>Método:</h3>\n\n/risk/detailedPosition  \n  \n\n<h3>Descripción</h3>\n\nPermite consultar la posición de la cuenta de forma detallada.\n\n<h3>Mejores prácticas de consumo</h3><h5>Buena práctica:</h5>\n\n1 request REST / 5 segundos  \n\n<h5>Justificación:</h5>\n\nPara mantener la estabilidad de la plataforma."
+					},
+					"response": []
+				}
+			],
+			"description": "<h2>Cuenta</h2>"
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "key",
+				"value": "X-Auth-Token",
+				"type": "string"
+			},
+			{
+				"key": "value",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"console.log(\"Votanos en el Postman Developers' Choice Awards!!!!\")"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "usuario",
+			"value": ""
+		},
+		{
+			"key": "clave",
+			"value": ""
+		},
+		{
+			"key": "cuenta",
+			"value": ""
+		},
+		{
+			"key": "last_send_order_clientId",
+			"value": ""
+		},
+		{
+			"key": "last_send_order_proprietary",
+			"value": ""
+		}
+	]
+}

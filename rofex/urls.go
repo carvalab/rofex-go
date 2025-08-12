@@ -1,0 +1,27 @@
+package rofex
+
+const (
+	pathAuth          = "auth/getToken"
+	pathSegments      = "rest/segment/all"
+	pathInstrAll      = "rest/instruments/all"
+	pathInstrDetails  = "rest/instruments/details"
+	pathInstrDetail   = "rest/instruments/detail?symbol=%s&marketId=%s"
+	pathInstrByCFI    = "rest/instruments/byCFICode?CFICode=%s"
+	pathInstrBySeg    = "rest/instruments/bySegment?MarketSegmentID=%s&MarketID=%s"
+	pathMDGet         = "rest/marketdata/get?marketId=%s&symbol=%s&entries=%s&depth=%d"
+	pathTrades        = "rest/data/getTrades?marketId=%s&symbol=%s&dateFrom=%s&dateTo=%s"
+	pathOrderStatus   = "rest/order/id?clOrdId=%s&proprietary=%s"
+	pathOrderAllByID  = "rest/order/allById?clOrdId=%s&proprietary=%s"
+	pathOrderByOrder  = "rest/order/byOrderId?orderId=%s"
+	pathOrderByExecID = "rest/order/byExecId?execId=%s"
+	pathOrderFilleds  = "rest/order/filleds?accountId=%s"
+	pathOrderActives  = "rest/order/actives?accountId=%s"
+	pathOrderReplace  = "rest/order/replaceById?clOrdId=%s&proprietary=%s"
+	pathNewOrder      = "rest/order/newSingleOrder?marketId=%s&symbol=%s&orderQty=%d&ordType=%s&side=%s&timeInForce=%s&account=%s&cancelPrevious=%t"
+	pathCancelOrder   = "rest/order/cancelById?clOrdId=%s&proprietary=%s"
+	pathAllOrders     = "rest/order/all?accountId=%s"
+	pathAccounts      = "rest/accounts"
+	pathAccountPos    = "rest/risk/position/getPositions/%s"
+	pathDetailedPos   = "rest/risk/detailedPosition/%s"
+	pathAccountReport = "rest/risk/accountReport/%s"
+)
