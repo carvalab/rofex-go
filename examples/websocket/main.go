@@ -22,11 +22,10 @@ import (
 func main() {
 	_ = godotenv.Load()
 
-	// Sólo se leen del entorno: usuario, contraseña y (opcional) depth
+	// Sólo se leen del entorno: usuario, contraseña y entorno
 	user := os.Getenv("PRIMARY_USER")
 	pass := os.Getenv("PRIMARY_PASS")
 	envVar := os.Getenv("PRIMARY_ENV")
-	depthVar := os.Getenv("PRIMARY_DEPTH")
 
 	if user == "" || pass == "" {
 		slog.Error("PRIMARY_USER and PRIMARY_PASS are required")
@@ -63,10 +62,8 @@ func main() {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 
+	// Profundidad fija para el ejemplo
 	depth := 1
-	if d, err := strconv.Atoi(strings.TrimSpace(depthVar)); err == nil && d > 0 {
-		depth = d
-	}
 
 	// Obtener la cuenta desde el endpoint (/rest/accounts)
 	accountsResp, err := client.Accounts(ctx)

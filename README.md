@@ -150,15 +150,25 @@ if len(md.MarketData.OF) > 0 {
 ### Enviar una Orden
 
 ```go
-// Enviar orden de compra limitada
+// Obtener la primera cuenta disponible y enviar orden de compra LIMIT
+accounts, err := client.Accounts(ctx)
+if err != nil {
+    log.Fatal("Error obteniendo cuentas:", err)
+}
+if len(accounts.Accounts) == 0 {
+    log.Fatal("No hay cuentas disponibles para el usuario")
+}
+account := accounts.Accounts[0].Name
+
 price := 18.50
 order, err := client.SendOrder(ctx, rofex.NewOrder{
     Symbol:  "DLR/DIC21",
+    Market:  model.MarketROFEX,
     Side:    model.Buy,
     Type:    model.OrderTypeLimit,
     Qty:     10,
     Price:   &price,
-    Account: "tu_cuenta",
+    Account: account,
     TIF:     model.Day,
 })
 if err != nil {
@@ -222,7 +232,16 @@ for {
 
 ```go
 // Suscribirse a reportes de órdenes
-orderSub, err := client.SubscribeOrderReport(ctx, "tu_cuenta", true)
+accounts, err := client.Accounts(ctx)
+if err != nil {
+    log.Fatal("Error obteniendo cuentas:", err)
+}
+if len(accounts.Accounts) == 0 {
+    log.Fatal("No hay cuentas disponibles para el usuario")
+}
+account := accounts.Accounts[0].Name
+
+orderSub, err := client.SubscribeOrderReport(ctx, account, true)
 if err != nil {
     log.Fatal("Error suscribiéndose a órdenes:", err)
 }

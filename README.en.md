@@ -91,15 +91,25 @@ if len(md.MarketData.OF) > 0 {
 ### Send an Order
 
 ```go
-// Send buy limit order
+// Fetch the first available account and send a BUY LIMIT order
+accounts, err := client.Accounts(ctx)
+if err != nil {
+    log.Fatal("Error getting accounts:", err)
+}
+if len(accounts.Accounts) == 0 {
+    log.Fatal("No accounts available for this user")
+}
+account := accounts.Accounts[0].Name
+
 price := 18.50
 order, err := client.SendOrder(ctx, rofex.NewOrder{
     Symbol:  "DLR/DIC21",
+    Market:  model.MarketROFEX,
     Side:    model.Buy,
     Type:    model.OrderTypeLimit,
     Qty:     10,
     Price:   &price,
-    Account: "your_account",
+    Account: account,
     TIF:     model.Day,
 })
 if err != nil {
@@ -221,8 +231,17 @@ for {
 ### Real-time Order Reports
 
 ```go
-// Subscribe to order reports
-orderSub, err := client.SubscribeOrderReport(ctx, "your_account", true)
+// Subscribe to order reports (fetch account first)
+accounts, err := client.Accounts(ctx)
+if err != nil {
+    log.Fatal("Error getting accounts:", err)
+}
+if len(accounts.Accounts) == 0 {
+    log.Fatal("No accounts available for this user")
+}
+account := accounts.Accounts[0].Name
+
+orderSub, err := client.SubscribeOrderReport(ctx, account, true)
 if err != nil {
     log.Fatal("Error subscribing to orders:", err)
 }

@@ -23,6 +23,7 @@ func main() {
 	pass := os.Getenv("PRIMARY_PASS")
 	envVar := os.Getenv("PRIMARY_ENV")
 
+	// Config por código
 	symbol := "GGAL/AGO25"
 
 	if user == "" || pass == "" {
@@ -52,7 +53,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
 	defer cancel()
 
 	// 1) Cuenta: se obtiene la primera cuenta del usuario desde /rest/accounts
@@ -127,7 +128,7 @@ func main() {
 		Symbol:  symbol,
 		Market:  model.MarketROFEX,
 		Entries: []model.MDEntry{model.MDBids, model.MDOffers, model.MDLast},
-		Depth:   1,
+		Depth:   2,
 	})
 	if err != nil {
 		slog.Error("market data", slog.Any("err", err))
