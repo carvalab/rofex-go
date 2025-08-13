@@ -112,14 +112,57 @@ func main() {
 
 	waitContinue("Continuar a Instruments por CFICode")
 
-	// 2.1) Instrumentos por CFICode (ej.: Futuros y CEDEAR)
-	byCFI, err := c.InstrumentsByCFICode(ctx, []model.CFICode{model.CFIFuture, model.CFICedear})
+	// 2.1) Instrumentos por CFICode (ej.:  CEDEAR)
+	byCFI, err := c.InstrumentsByCFICode(ctx, []model.CFICode{model.CFICedear})
 	if err != nil {
 		slog.Error("instruments by CFICode", slog.Any("err", err))
 		os.Exit(1)
 	}
 	bByCFI, _ := json.MarshalIndent(byCFI, "", "  ")
-	fmt.Println("Instruments by CFICode (FXXXSX, EMXXXX):\n" + string(bByCFI))
+	fmt.Println("Instruments by CFICode (EMXXXX):\n" + string(bByCFI))
+
+	// 2.1.a) Filtro simple y legible para CEDEARs "base" (sin sufijo C/D) y solo "24hs"
+	//   - Ejemplos: MSFTD, MSFT, MSFTC -> tomar "MSFT"
+	//   - De símbolos estilo: "MERV - XMEV - MSFT - 24hs", "MERV - XMEV - MSFTC - 24hs"
+	getBase24hs := func(sym string) (base string, suffixed bool, ok bool) {
+		parts := strings.Split(sym, " - ")
+		if len(parts) < 4 {
+			return "", false, false
+		}
+		if parts[0] != "MERV" || parts[len(parts)-1] != "24hs" {
+			return "", false, false
+		}
+		code := parts[2]
+		suff := strings.HasSuffix(code, "C") || strings.HasSuffix(code, "D")
+		if suff {
+			code = code[:len(code)-1]
+		}
+		return code, suff, true
+	}
+
+	// Agrupar por base y preferir el símbolo sin sufijo (si existe)
+	type choice struct{ sym string; suffixed bool }
+	baseTo := map[string]choice{}
+	for _, it := range byCFI.Instruments {
+		s := it.InstrumentID.Symbol
+		if s == "" {
+			s = it.SymbolAlt
+		}
+		base, suff, ok := getBase24hs(s)
+		if !ok {
+			continue
+		}
+		if prev, exists := baseTo[base]; !exists || (prev.suffixed && !suff) {
+			baseTo[base] = choice{sym: s, suffixed: suff}
+		}
+	}
+
+	if len(baseTo) > 0 {
+		fmt.Println("Filtered CEDEARs (base, 24hs):")
+		for base, ch := range baseTo {
+			fmt.Printf("- %s -> %s\n", base, ch.sym)
+		}
+	}
 
 	waitContinue("Continuar a Instruments All")
 
