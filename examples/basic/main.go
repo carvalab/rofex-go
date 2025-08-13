@@ -110,6 +110,17 @@ func main() {
 	bSeg, _ := json.MarshalIndent(seg, "", "  ")
 	fmt.Println("Segments:\n" + string(bSeg))
 
+	waitContinue("Continuar a Instruments por CFICode")
+
+	// 2.1) Instrumentos por CFICode (ej.: Futuros y CEDEAR)
+	byCFI, err := c.InstrumentsByCFICode(ctx, []model.CFICode{model.CFIFuture, model.CFICedear})
+	if err != nil {
+		slog.Error("instruments by CFICode", slog.Any("err", err))
+		os.Exit(1)
+	}
+	bByCFI, _ := json.MarshalIndent(byCFI, "", "  ")
+	fmt.Println("Instruments by CFICode (FXXXSX, EMXXXX):\n" + string(bByCFI))
+
 	waitContinue("Continuar a Instruments All")
 
 	// 3) Instrumentos: listado completo
