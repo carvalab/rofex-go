@@ -121,9 +121,10 @@ func main() {
 	bByCFI, _ := json.MarshalIndent(byCFI, "", "  ")
 	fmt.Println("Instruments by CFICode (EMXXXX):\n" + string(bByCFI))
 
-	// 2.1.a) Filtro simple: CEDEARs en pesos (solo "24hs"), agrupar por base y
-	// preferir el símbolo sin sufijo final C/D cuando exista.
-	basePick := map[string]string{}
+	// 2.1.a) Filtro simple: CEDEARs (solo "24hs"). Agrupa por base (sin C/D) y
+	// prefiere el símbolo base si existe, de lo contrario el primero encontrado.
+	chosen := map[string]string{}
+	baseSeen := map[string]bool{}
 	for _, it := range byCFI.Instruments {
 		s := it.InstrumentID.Symbol
 		if s == "" {
@@ -135,26 +136,24 @@ func main() {
 		}
 		code := parts[len(parts)-2]
 		base := code
-		if n := len(code); n > 1 {
-			if last := code[n-1]; last == 'C' || last == 'D' {
-				base = code[:n-1]
+		if strings.HasSuffix(code, "C") || strings.HasSuffix(code, "D") {
+			base = code[:len(code)-1]
+		}
+		if baseSeen[base] {
+			continue // ya elegimos el base
+		}
+		if strings.HasSuffix(code, "C") || strings.HasSuffix(code, "D") {
+			if _, ok := chosen[base]; !ok {
+				chosen[base] = s // guardar temporal hasta ver el base
 			}
-		}
-		keep := basePick[base]
-		if keep == "" {
-			basePick[base] = s
-			continue
-		}
-		prevCode := strings.Split(keep, " - ")[len(strings.Split(keep, " - "))-2]
-		currIsBase := !(strings.HasSuffix(code, "C") || strings.HasSuffix(code, "D"))
-		prevHasSuf := strings.HasSuffix(prevCode, "C") || strings.HasSuffix(prevCode, "D")
-		if currIsBase && prevHasSuf {
-			basePick[base] = s
+		} else {
+			chosen[base] = s  // preferir base
+			baseSeen[base] = true
 		}
 	}
-	if len(basePick) > 0 {
+	if len(chosen) > 0 {
 		fmt.Println("Filtered CEDEARs (base, 24hs):")
-		for b, sym := range basePick {
+		for b, sym := range chosen {
 			fmt.Printf("- %s -> %s\n", b, sym)
 		}
 	}
