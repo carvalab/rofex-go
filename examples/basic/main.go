@@ -121,43 +121,41 @@ func main() {
 	bByCFI, _ := json.MarshalIndent(byCFI, "", "  ")
 	fmt.Println("Instruments by CFICode (EMXXXX):\n" + string(bByCFI))
 
-	// 2.1.a) Filtro simple: CEDEARs en pesos (solo "24hs").
-	// Agrupa por base (quita sufijo final C/D si existe) y prefiere el símbolo sin sufijo.
-	getBaseIf24hs := func(sym string) (base string, isBase bool, ok bool) {
-		parts := strings.Split(sym, " - ")
-		// Formato esperado: ... - <CODE> - 24hs
-		if len(parts) < 2 || parts[len(parts)-1] != "24hs" {
-			return "", false, false
-		}
-		code := parts[len(parts)-2]
-		isBase = !(strings.HasSuffix(code, "C") || strings.HasSuffix(code, "D"))
-		if !isBase && len(code) > 1 {
-			code = code[:len(code)-1]
-		}
-		return code, isBase, true
-	}
-
-	type chosen struct{ sym string; base bool }
-	selected := map[string]chosen{}
+	// 2.1.a) Filtro simple: CEDEARs en pesos (solo "24hs"), agrupar por base y
+	// preferir el símbolo sin sufijo final C/D cuando exista.
+	basePick := map[string]string{}
 	for _, it := range byCFI.Instruments {
 		s := it.InstrumentID.Symbol
 		if s == "" {
 			s = it.SymbolAlt
 		}
-		b, isBase, ok := getBaseIf24hs(s)
-		if !ok {
+		parts := strings.Split(s, " - ")
+		if len(parts) < 2 || parts[len(parts)-1] != "24hs" {
 			continue
 		}
-		prev, exists := selected[b]
-		if !exists || (isBase && !prev.base) {
-			selected[b] = chosen{sym: s, base: isBase}
+		code := parts[len(parts)-2]
+		base := code
+		if n := len(code); n > 1 {
+			if last := code[n-1]; last == 'C' || last == 'D' {
+				base = code[:n-1]
+			}
+		}
+		keep := basePick[base]
+		if keep == "" {
+			basePick[base] = s
+			continue
+		}
+		prevCode := strings.Split(keep, " - ")[len(strings.Split(keep, " - "))-2]
+		currIsBase := !(strings.HasSuffix(code, "C") || strings.HasSuffix(code, "D"))
+		prevHasSuf := strings.HasSuffix(prevCode, "C") || strings.HasSuffix(prevCode, "D")
+		if currIsBase && prevHasSuf {
+			basePick[base] = s
 		}
 	}
-
-	if len(selected) > 0 {
+	if len(basePick) > 0 {
 		fmt.Println("Filtered CEDEARs (base, 24hs):")
-		for b, ch := range selected {
-			fmt.Printf("- %s -> %s\n", b, ch.sym)
+		for b, sym := range basePick {
+			fmt.Printf("- %s -> %s\n", b, sym)
 		}
 	}
 
