@@ -121,46 +121,43 @@ func main() {
 	bByCFI, _ := json.MarshalIndent(byCFI, "", "  ")
 	fmt.Println("Instruments by CFICode (EMXXXX):\n" + string(bByCFI))
 
-	// 2.1.a) Filtro simple y legible para CEDEARs "base" (sin sufijo C/D) y solo "24hs"
-	//   - Ejemplos: MSFTD, MSFT, MSFTC -> tomar "MSFT"
-	//   - De símbolos estilo: "MERV - XMEV - MSFT - 24hs", "MERV - XMEV - MSFTC - 24hs"
-	getBase24hs := func(sym string) (base string, suffixed bool, ok bool) {
+	// 2.1.a) Filtro simple: CEDEARs en pesos (solo "24hs").
+	// Agrupa por base (quita sufijo final C/D si existe) y prefiere el símbolo sin sufijo.
+	getBaseIf24hs := func(sym string) (base string, isBase bool, ok bool) {
 		parts := strings.Split(sym, " - ")
-		if len(parts) < 4 {
+		// Formato esperado: ... - <CODE> - 24hs
+		if len(parts) < 2 || parts[len(parts)-1] != "24hs" {
 			return "", false, false
 		}
-		if parts[0] != "MERV" || parts[len(parts)-1] != "24hs" {
-			return "", false, false
-		}
-		code := parts[2]
-		suff := strings.HasSuffix(code, "C") || strings.HasSuffix(code, "D")
-		if suff {
+		code := parts[len(parts)-2]
+		isBase = !(strings.HasSuffix(code, "C") || strings.HasSuffix(code, "D"))
+		if !isBase && len(code) > 1 {
 			code = code[:len(code)-1]
 		}
-		return code, suff, true
+		return code, isBase, true
 	}
 
-	// Agrupar por base y preferir el símbolo sin sufijo (si existe)
-	type choice struct{ sym string; suffixed bool }
-	baseTo := map[string]choice{}
+	type chosen struct{ sym string; base bool }
+	selected := map[string]chosen{}
 	for _, it := range byCFI.Instruments {
 		s := it.InstrumentID.Symbol
 		if s == "" {
 			s = it.SymbolAlt
 		}
-		base, suff, ok := getBase24hs(s)
+		b, isBase, ok := getBaseIf24hs(s)
 		if !ok {
 			continue
 		}
-		if prev, exists := baseTo[base]; !exists || (prev.suffixed && !suff) {
-			baseTo[base] = choice{sym: s, suffixed: suff}
+		prev, exists := selected[b]
+		if !exists || (isBase && !prev.base) {
+			selected[b] = chosen{sym: s, base: isBase}
 		}
 	}
 
-	if len(baseTo) > 0 {
+	if len(selected) > 0 {
 		fmt.Println("Filtered CEDEARs (base, 24hs):")
-		for base, ch := range baseTo {
-			fmt.Printf("- %s -> %s\n", base, ch.sym)
+		for b, ch := range selected {
+			fmt.Printf("- %s -> %s\n", b, ch.sym)
 		}
 	}
 
