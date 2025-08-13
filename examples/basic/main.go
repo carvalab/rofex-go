@@ -118,37 +118,33 @@ func main() {
 		slog.Error("instruments by CFICode", slog.Any("err", err))
 		os.Exit(1)
 	}
-	bByCFI, _ := json.MarshalIndent(byCFI, "", "  ")
-	fmt.Println("Instruments by CFICode (EMXXXX):\n" + string(bByCFI))
+	// bByCFI, _ := json.MarshalIndent(byCFI, "", "  ")
+	// fmt.Println("Instruments by CFICode (EMXXXX):\n" + string(bByCFI))
 
-	// 2.1.a) Filtro simple: CEDEARs (solo "24hs"). Agrupa por base (sin C/D) y
-	// prefiere el símbolo base si existe, de lo contrario el primero encontrado.
+	// 2.1.a) Filtro simple: CEDEARs (solo pesos "24hs"). Agrupa por base (sin C/D)
 	chosen := map[string]string{}
-	baseSeen := map[string]bool{}
 	for _, it := range byCFI.Instruments {
 		s := it.InstrumentID.Symbol
 		if s == "" {
 			s = it.SymbolAlt
 		}
 		parts := strings.Split(s, " - ")
-		if len(parts) < 2 || parts[len(parts)-1] != "24hs" {
+		if len(parts) < 2 || strings.TrimSpace(parts[len(parts)-1]) != "24hs" {
 			continue
 		}
-		code := parts[len(parts)-2]
-		base := code
-		if strings.HasSuffix(code, "C") || strings.HasSuffix(code, "D") {
-			base = code[:len(code)-1]
-		}
-		if baseSeen[base] {
-			continue // ya elegimos el base
-		}
-		if strings.HasSuffix(code, "C") || strings.HasSuffix(code, "D") {
-			if _, ok := chosen[base]; !ok {
-				chosen[base] = s // guardar temporal hasta ver el base
+		code := strings.TrimSpace(parts[len(parts)-2])
+		isVar := strings.HasSuffix(code, "C") || strings.HasSuffix(code, "D")
+		base := strings.TrimSuffix(strings.TrimSuffix(code, "C"), "D")
+		if _, exists := chosen[base]; !exists {
+			if isVar {
+				parts[len(parts)-2] = base
+				parts[len(parts)-1] = strings.TrimSpace(parts[len(parts)-1])
+				chosen[base] = strings.Join(parts, " - ")
+			} else {
+				chosen[base] = s
 			}
-		} else {
-			chosen[base] = s  // preferir base
-			baseSeen[base] = true
+		} else if !isVar {
+			chosen[base] = s
 		}
 	}
 	if len(chosen) > 0 {
