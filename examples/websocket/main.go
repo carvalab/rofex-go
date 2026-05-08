@@ -31,8 +31,6 @@ func main() {
 		slog.Error("PRIMARY_USER and PRIMARY_PASS are required")
 		os.Exit(1)
 	}
-	// Símbolos y entradas definidos en código
-	symbols := []string{"DLR/ENE26", "GGAL/AGO25", "MERV - XMEV - GD30 - 24hs"}
 	entries := []model.MDEntry{model.MDBids, model.MDOffers, model.MDLast, model.MDOpeningPrice, model.MDClosePrice, model.MDSettlementPrice, model.MDHighPrice, model.MDLowPrice, model.MDTradeVolume, model.MDOpenInterest}
 
 	env := model.EnvironmentRemarket
@@ -77,6 +75,37 @@ func main() {
 	}
 	account := accountsResp.Accounts[0].Name
 
+	// Obtener instrumentos disponibles y elegir hasta 3 símbolos válidos (sin espacios).
+	// Preferencia: DLR/ (futuros de dólar); luego cualquier símbolo sin espacios.
+	instr, err := client.InstrumentsAll(ctx)
+	if err != nil {
+		slog.Error("no se pudo obtener instrumentos", slog.Any("err", err))
+		os.Exit(1)
+	}
+	var symbols []string
+	var fallback string
+	for _, it := range instr.Instruments {
+		s := it.InstrumentID.Symbol
+		if s == "" || strings.Contains(s, " ") {
+			continue
+		}
+		if strings.HasPrefix(s, "DLR/") {
+			symbols = append(symbols, s)
+			if len(symbols) >= 3 {
+				break
+			}
+		} else if fallback == "" {
+			fallback = s
+		}
+	}
+	if len(symbols) == 0 && fallback != "" {
+		symbols = append(symbols, fallback)
+	}
+	if len(symbols) == 0 {
+		slog.Error("no hay instrumentos disponibles para la suscripcion")
+		os.Exit(1)
+	}
+
 	mdSub, err := client.SubscribeMarketData(ctx, symbols, entries, depth, model.MarketROFEX)
 	if err != nil {
 		slog.Error("subscribe market data", slog.Any("err", err))
@@ -104,7 +133,7 @@ func main() {
 		select {
 		case event := <-mdSub.Events:
 			if event != nil {
-				// Mostrar Market Data en formato tabla para lectura rápida
+				// Mostrar Market Data en formato tabla para lectura rapida
 				printMarketDataTable(event)
 			}
 		case err := <-mdSub.Errs:
@@ -112,26 +141,26 @@ func main() {
 				// Error del stream de Market Data
 				slog.Error("error websocket market data", slog.Any("err", err))
 			} else {
-				// Cierre limpio de la conexión de Market Data
-				slog.Info("conexión market data cerrada")
+				// Cierre limpio de la conexion de Market Data
+				slog.Info("conexion market data cerrada")
 				return
 			}
 		case event := <-orSub.Events:
 			if event != nil {
-				fmt.Printf("📋 OR %s: %s\n", event.OrderReport.ClOrdID, event.OrderReport.Status)
+				fmt.Printf("OR %s: %s\n", event.OrderReport.ClOrdID, event.OrderReport.Status)
 			}
 		case err := <-orSub.Errs:
 			if err != nil {
 				// Error del stream de Order Reports
 				slog.Error("error websocket order report", slog.Any("err", err))
 			} else {
-				// Cierre limpio de la conexión de Order Reports
-				slog.Info("conexión order report cerrada")
+				// Cierre limpio de la conexion de Order Reports
+				slog.Info("conexion order report cerrada")
 				return
 			}
 		case <-sig:
-			// Señal del SO recibida: cerrar ejemplo
-			slog.Info("señal recibida, cerrando")
+			// Senal del SO recibida: cerrar ejemplo
+			slog.Info("senal recibida, cerrando")
 			return
 		}
 	}
@@ -173,9 +202,9 @@ func printMarketDataTable(event *model.MarketDataEvent) {
 	for i, lvl := range md.Offers {
 		tw.AppendRow(table.Row{labelLevel("Ventas", i, len(md.Offers)), fmtNumber(lvl.Price), fmtNumber(lvl.Size), ""})
 	}
-	// LA (Último)
+	// LA (Ultimo)
 	if md.LA != nil {
-		tw.AppendRow(table.Row{"Último", fmtNumberPtr(md.LA.Price), fmtNumberPtr(md.LA.Size), formatMillis(md.LA.Date)})
+		tw.AppendRow(table.Row{"Ultimo", fmtNumberPtr(md.LA.Price), fmtNumberPtr(md.LA.Size), formatMillis(md.LA.Date)})
 	}
 	// OP (Apertura)
 	if md.OpeningPrice != nil {
@@ -190,19 +219,19 @@ func printMarketDataTable(event *model.MarketDataEvent) {
 		tw.AppendRow(table.Row{"Ajuste", fmtNumberPtr(md.SE.Price), fmtNumberPtr(md.SE.Size), formatMillis(md.SE.Date)})
 	}
 	if md.HighPrice != nil {
-		tw.AppendRow(table.Row{"Máximo", fmtNumber(*md.HighPrice), "", ""})
+		tw.AppendRow(table.Row{"Maximo", fmtNumber(*md.HighPrice), "", ""})
 	}
 	if md.LowPrice != nil {
-		tw.AppendRow(table.Row{"Mínimo", fmtNumber(*md.LowPrice), "", ""})
+		tw.AppendRow(table.Row{"Minimo", fmtNumber(*md.LowPrice), "", ""})
 	}
 	if md.TradeVolume != nil {
 		tw.AppendRow(table.Row{"Volumen", "", fmtNumber(*md.TradeVolume), ""})
 	}
 	if md.OpenInterest != nil {
-		tw.AppendRow(table.Row{"Interés Abierto", fmtNumberPtr(md.OpenInterest.Price), fmtNumberPtr(md.OpenInterest.Size), formatMillis(md.OpenInterest.Date)})
+		tw.AppendRow(table.Row{"Interes Abierto", fmtNumberPtr(md.OpenInterest.Price), fmtNumberPtr(md.OpenInterest.Size), formatMillis(md.OpenInterest.Date)})
 	}
 	if md.IndexValue != nil {
-		tw.AppendRow(table.Row{"Índice", fmtNumber(*md.IndexValue), "", ""})
+		tw.AppendRow(table.Row{"Indice", fmtNumber(*md.IndexValue), "", ""})
 	}
 	if md.EffectiveVolume != nil {
 		tw.AppendRow(table.Row{"Volumen Efectivo", "", fmtNumber(*md.EffectiveVolume), ""})
@@ -217,16 +246,16 @@ func printMarketDataTable(event *model.MarketDataEvent) {
 		tw.AppendRow(table.Row{"Trades", "", fmtNumber(*md.TradeCount), ""})
 	}
 
-	// Título: símbolo y hora del evento (en loc)
+	// Titulo: simbolo y hora del evento (en loc)
 	ts := ""
 	if event.Timestamp != nil {
 		ts = formatMillis(event.Timestamp)
 	}
-	fmt.Printf("\n📈 %s @ %s\n", event.InstrumentID.Symbol, ts)
+	fmt.Printf("\n %s @ %s\n", event.InstrumentID.Symbol, ts)
 	tw.Render()
 }
 
-// fmtNumber formatea números: sin decimales si es entero, con 2 decimales si no.
+// fmtNumber formatea numeros: sin decimales si es entero, con 2 decimales si no.
 func fmtNumber[N ~float64 | ~int | ~int64](v N) string {
 	switch any(v).(type) {
 	case float64:
@@ -251,7 +280,7 @@ func fmtNumberPtr[N ~float64 | ~int | ~int64](p *N) any {
 	return fmtNumber(*p)
 }
 
-// labelLevel devuelve una etiqueta amigable, agregando índice solo si hay múltiples niveles.
+// labelLevel devuelve una etiqueta amigable, agregando indice solo si hay multiples niveles.
 func labelLevel(base string, idx, total int) string {
 	if total > 1 {
 		return fmt.Sprintf("%s (%d)", base, idx+1)

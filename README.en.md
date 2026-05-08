@@ -1,6 +1,6 @@
 # rofex-go - Go SDK for Primary (ROFEX) Trading API
 
-![Go Version](https://img.shields.io/badge/Go-1.21+-blue.svg)
+![Go Version](https://img.shields.io/badge/Go-1.25+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)
 
@@ -563,6 +563,20 @@ Contributions are welcome! Please:
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
+## Environment Variables
+
+To use the sandbox (reMarkets), register a free account at **https://remarkets.primary.ventures/** and use those credentials for `PRIMARY_USER` and `PRIMARY_PASS`.
+
+Copy `.env.example` to `.env` and fill in your values:
+
+| Variable | Required | Description |
+|---|---|---|
+| `PRIMARY_USER` | Yes | Trading account username |
+| `PRIMARY_PASS` | Yes | Trading account password |
+| `PRIMARY_ENV` | No | `remarket` (default, sandbox) or `live` (production) |
+| `PRIMARY_BASE_URL` | Only for `live` | REST base URL for your broker (e.g. `https://api.eco.xoms.com.ar/`) |
+| `PRIMARY_WS_URL` | Only for `live` | WebSocket URL for your broker (e.g. `wss://api.eco.xoms.com.ar/`) |
+
 ## 📚 Documentation and Resources
 
 ### Primary Documentation
@@ -579,6 +593,14 @@ The `api_data.json` file contains the complete API specification and can be obta
 1. **From this repository**: [docs/api_data.json](docs/api_data.json)
 2. **From the API**: `GET https://api.remarkets.primary.com.ar/rest/api-data` (requires authentication)
 3. **From Swagger**: Export from [api-docs](https://api.remarkets.primary.com.ar/api-docs/index.html)
+
+### How to check the current API version
+This SDK targets **Primary API v1.21** (last updated December 2022). To verify whether a newer version has been released:
+
+1. **Swagger UI** (sandbox credentials required): open `https://api.remarkets.primary.com.ar/api-docs/index.html` — the page title shows the live API version.
+2. **REST endpoint** (auth token required): `GET https://api.remarkets.primary.com.ar/rest/api-data` — the JSON response includes the version field.
+3. **API Hub**: [apihub.primary.com.ar/assets/apidoc/trading/index.html](https://apihub.primary.com.ar/assets/apidoc/trading/index.html) — official trading API apidoc (no auth required).
+4. **Official Postman workspace**: [Primary API Trading – REST](https://www.postman.com/mtr-pmy/primary/documentation/s56nyis/primary-api-trading-rest) — maintained by Primary.
 
 ## 📞 Support
 

@@ -15,7 +15,7 @@ type testServerState struct {
 	goodToken  atomic.Value // string
 }
 
-func newTestServer(t *testing.T) (*httptest.Server, *testServerState) {
+func newTestServer(_ *testing.T) (*httptest.Server, *testServerState) {
 	st := &testServerState{}
 	st.goodToken.Store("token-initial")
 

@@ -19,9 +19,9 @@ func main() {
 	pass := os.Getenv("PRIMARY_PASS")
 	envVar := os.Getenv("PRIMARY_ENV")
 	// Config por código (simplificado)
-	symbol := "DLR/ENE26" // símbolo de ejemplo
-	qty := int64(1)       // cantidad
-	price := 10.0         // precio para limit
+	var symbol string
+	qty := int64(1) // cantidad
+	price := 10.0   // precio para limit
 
 	if user == "" || pass == "" {
 		slog.Error("PRIMARY_USER and PRIMARY_PASS are required")
@@ -52,6 +52,30 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 180*time.Second)
 	defer cancel()
 	_ = ctx // Las operaciones WebSocket usan contextos internos
+
+	intr, err := c.InstrumentsAll(ctx)
+	if err != nil {
+		slog.Error("instruments", slog.Any("err", err))
+		os.Exit(1)
+	}
+	for _, it := range intr.Instruments {
+		s := it.InstrumentID.Symbol
+		if s == "" {
+			continue
+		}
+		if strings.HasPrefix(s, "DLR/") {
+			symbol = s
+			break
+		}
+		if symbol == "" && !strings.Contains(s, " ") {
+			symbol = s
+		}
+	}
+	if symbol == "" {
+		slog.Error("no symbol available")
+		os.Exit(1)
+	}
+	slog.Info("using symbol", slog.String("symbol", symbol))
 
 	// Obtener la primera cuenta desde la API
 	accounts, err := c.Accounts(ctx)

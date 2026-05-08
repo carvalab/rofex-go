@@ -23,8 +23,7 @@ func main() {
 	pass := os.Getenv("PRIMARY_PASS")
 	envVar := os.Getenv("PRIMARY_ENV")
 
-	// Config por código
-	symbol := "GGAL/AGO25"
+	var symbol string
 
 	if user == "" || pass == "" {
 		slog.Error("PRIMARY_USER and PRIMARY_PASS are required")
@@ -164,6 +163,26 @@ func main() {
 	}
 	bIntr, _ := json.MarshalIndent(intr, "", "  ")
 	fmt.Println("Instruments All:\n" + string(bIntr))
+
+	// Prefer a DLR futures symbol; fall back to first symbol without spaces
+	for _, it := range intr.Instruments {
+		s := it.InstrumentID.Symbol
+		if s == "" {
+			continue
+		}
+		if strings.HasPrefix(s, "DLR/") {
+			symbol = s
+			break
+		}
+		if symbol == "" && !strings.Contains(s, " ") {
+			symbol = s
+		}
+	}
+	if symbol == "" {
+		slog.Error("no instruments available for market data demo")
+		os.Exit(1)
+	}
+	slog.Info("market data demo", slog.String("symbol", symbol))
 
 	waitContinue("Continuar a Snapshot de Market Data")
 

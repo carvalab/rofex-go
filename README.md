@@ -59,7 +59,7 @@ Ordenamiento de niveles (cuando depth > 1):
 
 Para más detalles ver `docs/primary-api.md`.
 
-![Go Version](https://img.shields.io/badge/Go-1.21+-blue.svg)
+![Go Version](https://img.shields.io/badge/Go-1.25+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)
 
@@ -563,6 +563,20 @@ Las contribuciones son bienvenidas! Por favor:
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
 
+## Variables de entorno
+
+Para usar el sandbox (reMarkets), registrá una cuenta gratuita en **https://remarkets.primary.ventures/** y usá esas credenciales en `PRIMARY_USER` y `PRIMARY_PASS`.
+
+Copia `.env.example` a `.env` y completa tus valores:
+
+| Variable | Requerida | Descripción |
+|---|---|---|
+| `PRIMARY_USER` | Sí | Usuario de la cuenta de trading |
+| `PRIMARY_PASS` | Sí | Contraseña de la cuenta de trading |
+| `PRIMARY_ENV` | No | `remarket` (default, sandbox) o `live` (producción) |
+| `PRIMARY_BASE_URL` | Solo para `live` | URL REST de tu broker (ej. `https://api.eco.xoms.com.ar/`) |
+| `PRIMARY_WS_URL` | Solo para `live` | URL WebSocket de tu broker (ej. `wss://api.eco.xoms.com.ar/`) |
+
 ## 📚 Documentación y Recursos
 
 ### Documentación Principal
@@ -580,6 +594,14 @@ El archivo `api_data.json` contiene la especificación completa de la API y se p
 1. **Desde este repositorio**: [docs/api_data.json](docs/api_data.json)
 2. **Desde la API**: `GET https://api.remarkets.primary.com.ar/rest/api-data` (requiere autenticación)
 3. **Desde Swagger**: Exportar desde [api-docs](https://api.remarkets.primary.com.ar/api-docs/index.html)
+
+### Cómo verificar la versión actual de la API
+Este SDK apunta a la **Primary API v1.21** (última actualización diciembre 2022). Para verificar si existe una versión más reciente:
+
+1. **Swagger UI** (requiere credenciales sandbox): abrir `https://api.remarkets.primary.com.ar/api-docs/index.html` — el título de la página muestra la versión en vivo.
+2. **Endpoint REST** (requiere token): `GET https://api.remarkets.primary.com.ar/rest/api-data` — la respuesta JSON incluye el campo de versión.
+3. **API Hub**: [apihub.primary.com.ar/assets/apidoc/trading/index.html](https://apihub.primary.com.ar/assets/apidoc/trading/index.html) — documentación oficial del trading API (sin autenticación).
+4. **Workspace oficial en Postman**: [Primary API Trading – REST](https://www.postman.com/mtr-pmy/primary/documentation/s56nyis/primary-api-trading-rest) — mantenido por Primary.
 
 ## 📞 Soporte
 

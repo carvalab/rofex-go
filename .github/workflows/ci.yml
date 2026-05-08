@@ -2,12 +2,14 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+    tags: ["v*"]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  build-test:
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -16,11 +18,12 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24.x'
+          go-version-file: go.mod
 
-      - name: Go mod tidy
+      - name: Verify go.mod and go.sum are tidy
         run: |
-          go mod tidy -v
+          go mod tidy
+          git diff --exit-code go.mod go.sum
 
       - name: Format (gofmt -s)
         run: |
@@ -33,4 +36,22 @@ jobs:
         run: go vet ./...
 
       - name: Test
-        run: go test -v ./...
+        run: go test -race -v ./...
+
+  release:
+    name: Release
+    needs: test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true

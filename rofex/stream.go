@@ -153,7 +153,7 @@ func (sc *StreamConnection) IsConnected() bool {
 }
 
 // WriteJSON writes a JSON message to the websocket
-func (sc *StreamConnection) WriteJSON(ctx context.Context, v interface{}) error {
+func (sc *StreamConnection) WriteJSON(ctx context.Context, v any) error {
 	sc.mu.RLock()
 	if !sc.isConnected || sc.conn == nil {
 		sc.mu.RUnlock()
@@ -166,7 +166,7 @@ func (sc *StreamConnection) WriteJSON(ctx context.Context, v interface{}) error 
 }
 
 // ReadJSON reads a JSON message from the websocket
-func (sc *StreamConnection) ReadJSON(ctx context.Context, v interface{}) error {
+func (sc *StreamConnection) ReadJSON(ctx context.Context, v any) error {
 	sc.mu.RLock()
 	if !sc.isConnected || sc.conn == nil {
 		sc.mu.RUnlock()
@@ -289,7 +289,7 @@ func (c *Client) SubscribeMarketData(ctx context.Context, symbols []string, entr
 func (c *Client) manageMarketDataConnection(
 	ctx context.Context,
 	sub *MarketDataSubscription,
-	subscriptionMsg interface{},
+	subscriptionMsg any,
 	eventsChan chan<- *model.MarketDataEvent,
 	errorChan chan<- error,
 ) {
@@ -371,7 +371,7 @@ func (c *Client) processMarketDataMessages(
 	ctx context.Context,
 	conn *StreamConnection,
 	eventsChan chan<- *model.MarketDataEvent,
-	errorChan chan<- error,
+	_ chan<- error,
 ) error {
 	// Create context for this connection session
 	connCtx, connCancel := context.WithCancel(ctx)
@@ -517,7 +517,7 @@ func (c *Client) SubscribeOrderReport(ctx context.Context, account string, snaps
 func (c *Client) manageOrderReportConnection(
 	ctx context.Context,
 	sub *OrderReportSubscription,
-	subscriptionMsg interface{},
+	subscriptionMsg any,
 	eventsChan chan<- *model.OrderReportEvent,
 	errorChan chan<- error,
 ) {
@@ -591,7 +591,7 @@ func (c *Client) processOrderReportMessages(
 	ctx context.Context,
 	conn *StreamConnection,
 	eventsChan chan<- *model.OrderReportEvent,
-	errorChan chan<- error,
+	_ chan<- error,
 ) error {
 	connCtx, connCancel := context.WithCancel(ctx)
 	defer connCancel()

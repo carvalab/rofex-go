@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/carvalab/rofex-go/rofex"
@@ -43,13 +44,35 @@ func main() {
 		log.Fatal(err)
 	}
 
+	intr, err := client.InstrumentsAll(ctx)
+	if err != nil {
+		log.Fatalf("instruments: %v", err)
+	}
+	var rofexSymbol string
+	for _, it := range intr.Instruments {
+		s := it.InstrumentID.Symbol
+		if s == "" {
+			continue
+		}
+		if strings.HasPrefix(s, "DLR/") {
+			rofexSymbol = s
+			break
+		}
+		if rofexSymbol == "" && !strings.Contains(s, " ") {
+			rofexSymbol = s
+		}
+	}
+	if rofexSymbol == "" {
+		log.Fatal("no symbol available")
+	}
+	log.Printf("using symbol: %s", rofexSymbol)
+
 	// Parámetros de ejemplo (1 minuto). Usamos UTC para alinear con timestamps ...Z del JSON.
 	to := time.Now().UTC()
 	from := to.AddDate(0, 0, -2)
 	res := model.Resolution1m
 
 	// 1) Candles para un instrumento ROFEX (interno)
-	rofexSymbol := "GGAL/AGO25"
 	rofexMarket := model.MarketROFEX
 	candlesROFEX, err := client.HistoricCandles(ctx, rofexSymbol, rofexMarket, from, to, res)
 	if err != nil {

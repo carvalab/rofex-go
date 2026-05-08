@@ -51,7 +51,7 @@ func (c *Client) MarketDataSnapshot(ctx context.Context, req MDRequest) (model.M
 		req.Depth = 1
 	}
 	entries := joinEntries(req.Entries)
-	path := fmt.Sprintf(pathMDGet, string(req.Market), req.Symbol, entries, req.Depth)
+	path := fmt.Sprintf(pathMDGet, string(req.Market), url.QueryEscape(req.Symbol), entries, req.Depth)
 	return getTyped[model.MarketDataSnapshotResponse](ctx, c, path)
 }
 
