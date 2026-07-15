@@ -54,11 +54,6 @@ func newTestServer(_ *testing.T) (*httptest.Server, *testServerState) {
 }
 
 func TestLoginAndSegments_With401Refresh(t *testing.T) {
-	// constants
-	loginPath := "/auth/getToken"
-	segmentsPath := "/rest/segment/all"
-	unauthCode := http.StatusUnauthorized
-
 	ts, st := newTestServer(t)
 	defer ts.Close()
 
@@ -85,7 +80,6 @@ func TestLoginAndSegments_With401Refresh(t *testing.T) {
 	if err != nil {
 		t.Fatalf("segments after refresh: %v", err)
 	}
-	// Basic check (typed)
 	if len(res.Segments) == 0 {
 		t.Fatalf("no segments returned")
 	}
@@ -94,8 +88,4 @@ func TestLoginAndSegments_With401Refresh(t *testing.T) {
 	if atomic.LoadInt32(&st.loginCalls) < 2 {
 		t.Fatalf("expected at least 2 login calls, got %d", st.loginCalls)
 	}
-
-	_ = loginPath
-	_ = segmentsPath
-	_ = unauthCode
 }

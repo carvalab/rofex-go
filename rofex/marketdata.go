@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/carvalab/rofex-go/rofex/model"
@@ -42,7 +43,7 @@ type MDRequest struct {
 // Referencia: docs/primary-api.md - "MarketData en tiempo real a través de REST"
 func (c *Client) MarketDataSnapshot(ctx context.Context, req MDRequest) (model.MarketDataSnapshotResponse, error) {
 	if req.Symbol == "" {
-		return model.MarketDataSnapshotResponse{}, &ValidationError{Field: "symbol", Msg: "required"}
+		return model.MarketDataSnapshotResponse{}, fmt.Errorf("validation: symbol: required")
 	}
 	if req.Market == "" {
 		req.Market = model.MarketROFEX
@@ -50,8 +51,13 @@ func (c *Client) MarketDataSnapshot(ctx context.Context, req MDRequest) (model.M
 	if req.Depth <= 0 {
 		req.Depth = 1
 	}
-	entries := joinEntries(req.Entries)
-	path := fmt.Sprintf(pathMDGet, string(req.Market), url.QueryEscape(req.Symbol), entries, req.Depth)
+	q := url.Values{
+		"marketId": {string(req.Market)},
+		"symbol":   {req.Symbol},
+		"entries":  {joinEntries(req.Entries)},
+		"depth":    {strconv.Itoa(req.Depth)},
+	}
+	path := pathMDGet + "?" + q.Encode()
 	return getTyped[model.MarketDataSnapshotResponse](ctx, c, path)
 }
 
@@ -72,23 +78,25 @@ func (c *Client) MarketDataSnapshot(ctx context.Context, req MDRequest) (model.M
 // Referencia: docs/primary-api.md - "MarketData Histórica"
 func (c *Client) HistoricTrades(ctx context.Context, symbol string, market model.Market, from, to time.Time) (model.TradesResponse, error) {
 	if symbol == "" {
-		return model.TradesResponse{}, &ValidationError{Field: "symbol", Msg: "required"}
+		return model.TradesResponse{}, fmt.Errorf("validation: symbol: required")
 	}
 	if market == "" {
 		market = model.MarketROFEX
 	}
 	df := from.Format("2006-01-02")
 	dt := to.Format("2006-01-02")
-	// URL-encode symbol to safely handle spaces and special characters
-	escSymbol := url.QueryEscape(symbol)
-	path := fmt.Sprintf(pathTrades, string(market), escSymbol, df, dt)
-	// If market is different from ROFEX (e.g., MERV/ByMA), add external=true
+	q := url.Values{
+		"marketId": {string(market)},
+		"symbol":   {symbol},
+		"dateFrom": {df},
+		"dateTo":   {dt},
+	}
 	if market != model.MarketROFEX {
-		path += "&external=true"
+		q.Set("external", "true")
 	}
-	// In REMARKET (sandbox), also append environment=REMARKETS as per docs
 	if c.env == model.EnvironmentRemarket {
-		path += "&environment=REMARKETS"
+		q.Set("environment", "REMARKETS")
 	}
+	path := pathTrades + "?" + q.Encode()
 	return getTyped[model.TradesResponse](ctx, c, path)
 }

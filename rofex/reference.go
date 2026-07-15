@@ -2,7 +2,6 @@ package rofex
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"strings"
 
@@ -66,8 +65,11 @@ func (c *Client) InstrumentsDetails(ctx context.Context) (model.InstrumentsRespo
 //
 // Referencia: docs/primary-api.md - "Descripción detallada de un Instrumento"
 func (c *Client) InstrumentDetail(ctx context.Context, symbol string, market model.Market) (model.InstrumentDetailResponse, error) {
-	escSymbol := url.QueryEscape(symbol)
-	path := fmt.Sprintf(pathInstrDetail, escSymbol, string(market))
+	q := url.Values{
+		"symbol":   {symbol},
+		"marketId": {string(market)},
+	}
+	path := pathInstrDetail + "?" + q.Encode()
 	return getTyped[model.InstrumentDetailResponse](ctx, c, path)
 }
 
@@ -91,7 +93,7 @@ func (c *Client) InstrumentDetail(ctx context.Context, symbol string, market mod
 func (c *Client) InstrumentsByCFICode(ctx context.Context, codes []model.CFICode) (model.InstrumentsResponse, error) {
 	agg := model.InstrumentsResponse{}
 	for _, code := range codes {
-		path := fmt.Sprintf(pathInstrByCFI, string(code))
+		path := pathInstrByCFI + "?" + (url.Values{"CFICode": {string(code)}}).Encode()
 		res, err := getTyped[model.InstrumentsResponse](ctx, c, path)
 		if err != nil {
 			return model.InstrumentsResponse{}, err
@@ -112,7 +114,11 @@ func (c *Client) InstrumentsByCFICode(ctx context.Context, codes []model.CFICode
 func (c *Client) InstrumentsBySegment(ctx context.Context, market model.Market, segs []model.MarketSegment) (model.InstrumentsResponse, error) {
 	agg := model.InstrumentsResponse{}
 	for _, seg := range segs {
-		path := fmt.Sprintf(pathInstrBySeg, string(seg), string(market))
+		q := url.Values{
+			"MarketSegmentID": {string(seg)},
+			"MarketID":        {string(market)},
+		}
+		path := pathInstrBySeg + "?" + q.Encode()
 		res, err := getTyped[model.InstrumentsResponse](ctx, c, path)
 		if err != nil {
 			return model.InstrumentsResponse{}, err

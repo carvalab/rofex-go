@@ -2,6 +2,7 @@ package rofex
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"time"
 
@@ -26,7 +27,7 @@ func (c *Client) HistoricCandles(
 	resolution model.CandleResolution,
 ) ([]model.OHLCV, error) {
 	if symbol == "" {
-		return nil, &ValidationError{Field: "symbol", Msg: "required"}
+		return nil, fmt.Errorf("validation: symbol: required")
 	}
 	if market == "" {
 		market = model.MarketROFEX

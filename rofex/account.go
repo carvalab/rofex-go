@@ -29,9 +29,9 @@ func (c *Client) Accounts(ctx context.Context) (model.AccountsResponse, error) {
 // Referencia: docs/primary-api.md - "Consultar las posiciones de una cuenta"
 func (c *Client) AccountPosition(ctx context.Context, account string) (model.AccountPositionResponse, error) {
 	if account == "" {
-		return model.AccountPositionResponse{}, &ValidationError{Field: "account", Msg: "required"}
+		return model.AccountPositionResponse{}, fmt.Errorf("validation: account: required")
 	}
-	path := fmt.Sprintf(pathAccountPos, account)
+	path := pathAccountPos + "/" + account
 	return getTyped[model.AccountPositionResponse](ctx, c, path)
 }
 
@@ -46,9 +46,9 @@ func (c *Client) AccountPosition(ctx context.Context, account string) (model.Acc
 // Referencia: docs/primary-api.md - "Consultar detalle de posiciones"
 func (c *Client) DetailedPosition(ctx context.Context, account string) (model.DetailedPositionResponse, error) {
 	if account == "" {
-		return model.DetailedPositionResponse{}, &ValidationError{Field: "account", Msg: "required"}
+		return model.DetailedPositionResponse{}, fmt.Errorf("validation: account: required")
 	}
-	path := fmt.Sprintf(pathDetailedPos, account)
+	path := pathDetailedPos + "/" + account
 	return getTyped[model.DetailedPositionResponse](ctx, c, path)
 }
 
@@ -69,8 +69,8 @@ func (c *Client) DetailedPosition(ctx context.Context, account string) (model.De
 // Referencia: docs/primary-api.md - "Consultar reporte de cuenta"
 func (c *Client) AccountReport(ctx context.Context, account string) (model.AccountReportResponse, error) {
 	if account == "" {
-		return model.AccountReportResponse{}, &ValidationError{Field: "account", Msg: "required"}
+		return model.AccountReportResponse{}, fmt.Errorf("validation: account: required")
 	}
-	path := fmt.Sprintf(pathAccountReport, account)
+	path := pathAccountReport + "/" + account
 	return getTyped[model.AccountReportResponse](ctx, c, path)
 }
