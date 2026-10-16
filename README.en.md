@@ -2,7 +2,6 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/carvalab/rofex-go/rofex.svg)](https://pkg.go.dev/github.com/carvalab/rofex-go/rofex)
 [![CI](https://github.com/carvalab/rofex-go/actions/workflows/ci.yml/badge.svg)](https://github.com/carvalab/rofex-go/actions/workflows/ci.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/carvalab/rofex-go)](https://goreportcard.com/report/github.com/carvalab/rofex-go)
 [![Release](https://img.shields.io/github/v/release/carvalab/rofex-go)](https://github.com/carvalab/rofex-go/releases)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/carvalab/rofex-go)](go.mod)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
