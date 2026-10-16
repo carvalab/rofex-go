@@ -6,19 +6,28 @@ on:
     tags: ["v*"]
   pull_request:
     branches: [main]
+  schedule:
+    # Lunes a viernes 15:00 UTC (12:00 ART, mercado abierto): detecta cambios en la API real.
+    - cron: "0 15 * * 1-5"
+  workflow_dispatch:
 
 jobs:
   test:
-    name: Test
+    name: Test (Go ${{ matrix.go }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Versión mínima soportada (go.mod) y la última estable.
+        go: ["1.26.x", "stable"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
-          go-version-file: go.mod
+          go-version: ${{ matrix.go }}
 
       - name: Verify go.mod and go.sum are tidy
         run: |
@@ -33,21 +42,62 @@ jobs:
           fi
 
       - name: Vet
-        run: go vet ./...
+        run: |
+          go vet ./...
+          go vet -tags=integration ./...
 
       - name: Test
         run: go test -race -v ./...
 
+  # Tests read-only contra la API real de Primary (no envía órdenes).
+  # Secrets: PRIMARY_USER / PRIMARY_PASS. Variables opcionales:
+  # PRIMARY_ENV ("live" o vacío = REMARKET), PRIMARY_BASE_URL, PRIMARY_WS_URL, PRIMARY_IT_SYMBOL.
+  integration:
+    name: Integration (real API)
+    needs: test
+    # Los PRs desde forks no tienen acceso a secrets.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    concurrency:
+      group: integration
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: stable
+
+      - name: Check credentials
+        env:
+          PRIMARY_USER: ${{ secrets.PRIMARY_USER }}
+        run: |
+          if [ -z "$PRIMARY_USER" ]; then
+            echo "::warning::PRIMARY_USER/PRIMARY_PASS secrets not set; integration tests will be skipped"
+          fi
+
+      - name: Integration tests
+        env:
+          PRIMARY_USER: ${{ secrets.PRIMARY_USER }}
+          PRIMARY_PASS: ${{ secrets.PRIMARY_PASS }}
+          PRIMARY_ENV: ${{ vars.PRIMARY_ENV }}
+          PRIMARY_BASE_URL: ${{ vars.PRIMARY_BASE_URL }}
+          PRIMARY_WS_URL: ${{ vars.PRIMARY_WS_URL }}
+          PRIMARY_IT_SYMBOL: ${{ vars.PRIMARY_IT_SYMBOL }}
+        run: go test -tags=integration -count=1 -v -run Integration ./rofex/
+
   release:
     name: Release
-    needs: test
+    needs: [test, integration]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 

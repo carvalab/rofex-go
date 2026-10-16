@@ -59,7 +59,7 @@ Ordenamiento de niveles (cuando depth > 1):
 
 Para más detalles ver `docs/primary-api.md`.
 
-![Go Version](https://img.shields.io/badge/Go-1.25+-blue.svg)
+![Go Version](https://img.shields.io/badge/Go-1.26+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)
 
@@ -576,6 +576,16 @@ Copia `.env.example` a `.env` y completa tus valores:
 | `PRIMARY_ENV` | No | `remarket` (default, sandbox) o `live` (producción) |
 | `PRIMARY_BASE_URL` | Solo para `live` | URL REST de tu broker (ej. `https://api.eco.xoms.com.ar/`) |
 | `PRIMARY_WS_URL` | Solo para `live` | URL WebSocket de tu broker (ej. `wss://api.eco.xoms.com.ar/`) |
+
+### Tests de integración (API real)
+
+Tests read-only contra la API real de Primary (nunca envían órdenes). Usan las mismas variables que `.env` y se saltean si faltan las credenciales:
+
+```bash
+make test-integration
+```
+
+En CI corren en cada push a `main`, en los tags y de lunes a viernes en horario de mercado. Configurá los secrets `PRIMARY_USER` / `PRIMARY_PASS` del repositorio y, opcionalmente, las variables `PRIMARY_ENV`, `PRIMARY_BASE_URL`, `PRIMARY_WS_URL` y `PRIMARY_IT_SYMBOL`.
 
 ## 📚 Documentación y Recursos
 

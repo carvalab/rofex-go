@@ -393,3 +393,23 @@ func mustEq(t *testing.T, q url.Values, key, want string) {
 		t.Fatalf("query %s: want %s got %s", key, want, got)
 	}
 }
+
+func TestMarketDataSnapshot_SymbolWithSpacesIsEscaped(t *testing.T) {
+	symbol := "MERV - XMEV - GGAL - 24hs"
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.URL.Query().Get("symbol"); got != symbol {
+			t.Fatalf("symbol: got %q, want %q", got, symbol)
+		}
+		_ = json.NewEncoder(w).Encode(map[string]any{"status": "OK", "marketData": map[string]any{}})
+	}))
+	defer ts.Close()
+
+	c, _ := NewClient(WithBaseURL(ts.URL + "/"))
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if _, err := c.MarketDataSnapshot(ctx, MDRequest{Symbol: symbol, Market: model.MarketROFEX}); err != nil {
+		t.Fatalf("MarketDataSnapshot: %v", err)
+	}
+}

@@ -1,6 +1,6 @@
 # rofex-go - Go SDK for Primary (ROFEX) Trading API
 
-![Go Version](https://img.shields.io/badge/Go-1.25+-blue.svg)
+![Go Version](https://img.shields.io/badge/Go-1.26+-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)
 
@@ -576,6 +576,16 @@ Copy `.env.example` to `.env` and fill in your values:
 | `PRIMARY_ENV` | No | `remarket` (default, sandbox) or `live` (production) |
 | `PRIMARY_BASE_URL` | Only for `live` | REST base URL for your broker (e.g. `https://api.eco.xoms.com.ar/`) |
 | `PRIMARY_WS_URL` | Only for `live` | WebSocket URL for your broker (e.g. `wss://api.eco.xoms.com.ar/`) |
+
+### Integration tests (real API)
+
+Read-only tests against the real Primary API (they never send orders). They use the same variables as `.env` and are skipped when credentials are missing:
+
+```bash
+make test-integration
+```
+
+In CI they run on every push to `main`, on tags and on weekdays during market hours. Set the `PRIMARY_USER` / `PRIMARY_PASS` repository secrets and, optionally, the `PRIMARY_ENV`, `PRIMARY_BASE_URL`, `PRIMARY_WS_URL` and `PRIMARY_IT_SYMBOL` variables.
 
 ## 📚 Documentation and Resources
 
