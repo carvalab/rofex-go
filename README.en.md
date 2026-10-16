@@ -1,10 +1,15 @@
-# rofex-go - Go SDK for Primary (ROFEX) Trading API
+# rofex-go: Go SDK for the Primary API (MATBA ROFEX / BYMA)
 
-![Go Version](https://img.shields.io/badge/Go-1.26+-blue.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
-![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)
+[![Go Reference](https://pkg.go.dev/badge/github.com/carvalab/rofex-go/rofex.svg)](https://pkg.go.dev/github.com/carvalab/rofex-go/rofex)
+[![CI](https://github.com/carvalab/rofex-go/actions/workflows/ci.yml/badge.svg)](https://github.com/carvalab/rofex-go/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/carvalab/rofex-go)](https://goreportcard.com/report/github.com/carvalab/rofex-go)
+[![Release](https://img.shields.io/github/v/release/carvalab/rofex-go)](https://github.com/carvalab/rofex-go/releases)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/carvalab/rofex-go)](go.mod)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-A complete and modern Go SDK for interacting with the Primary (formerly ROFEX) trading API, Argentina's leading futures and options market.
+[Español](README.md) | **English**
+
+Go SDK for the **Primary** trading API used by MATBA ROFEX and brokers such as Eco Valores: REST and WebSocket market data, orders, accounts and risk, on both reMarkets (sandbox) and production. It is the Go counterpart of [pyRofex](https://github.com/matbarofex/pyRofex).
 
 ## 🚀 Features
 
@@ -77,14 +82,13 @@ if err != nil {
     log.Fatal("Error getting market data:", err)
 }
 
-fmt.Printf("Market Data for %s:\n", md.Instrument.Symbol)
-if len(md.MarketData.BI) > 0 {
-    fmt.Printf("Best Bid: $%.2f (Size: %d)\n", 
-        md.MarketData.BI[0].Price, md.MarketData.BI[0].Size)
+if len(md.MarketData.Bids) > 0 {
+    fmt.Printf("Best Bid: $%.2f (Size: %g)\n",
+        md.MarketData.Bids[0].Price, md.MarketData.Bids[0].Size)
 }
-if len(md.MarketData.OF) > 0 {
-    fmt.Printf("Best Offer: $%.2f (Size: %d)\n",
-        md.MarketData.OF[0].Price, md.MarketData.OF[0].Size)
+if len(md.MarketData.Offers) > 0 {
+    fmt.Printf("Best Offer: $%.2f (Size: %g)\n",
+        md.MarketData.Offers[0].Price, md.MarketData.Offers[0].Size)
 }
 ```
 
@@ -283,7 +287,7 @@ import "golang.org/x/time/rate"
 limiter := rate.NewLimiter(rate.Limit(10), 1) // 10 requests/second, burst=1
 
 client, err := rofex.NewClient(
-    rofex.WithRateLimit(limiter),
+    rofex.WithRateLimiter(limiter.Wait),
     // ... other options
 )
 ```
@@ -467,28 +471,14 @@ type NewOrder struct {
 if err != nil {
     var httpErr *rofex.HTTPError
     if errors.As(err, &httpErr) {
-        fmt.Printf("HTTP Error %d: %s\n", httpErr.StatusCode, string(httpErr.Body))
+        fmt.Printf("HTTP error %d: %s\n", httpErr.StatusCode, string(httpErr.Body))
         return
     }
-    var validationErr *rofex.ValidationError  
-    if errors.As(err, &validationErr) {
-        fmt.Printf("Validation Error in %s: %s\n", validationErr.Field, validationErr.Msg)
+    if errors.Is(err, rofex.ErrUnauthorized) {
+        fmt.Println("Authentication error: check username and password")
         return
     }
-    var authErr *rofex.AuthError
-    if errors.As(err, &authErr) {
-        fmt.Printf("Authentication Error: %s\n", authErr.Msg)
-        // Retry with new credentials
-        return
-    }
-    var tempErr *rofex.TemporaryError
-    if errors.As(err, &tempErr) {
-        fmt.Printf("Temporary Error: %s - retry in a few seconds\n", tempErr.Error())
-        time.Sleep(5 * time.Second)
-        // Retry the operation
-        return
-    }
-    fmt.Printf("Uncategorized error: %v\n", err)
+    fmt.Printf("Error: %v\n", err)
 }
 ```
 

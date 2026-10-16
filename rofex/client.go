@@ -1,23 +1,3 @@
-// Package rofex provides a Go SDK for the Primary (ROFEX) trading API.
-//
-// It implements a complete client for the Primary API v1.21 (REST + WebSocket):
-//
-//   - Market data (real-time and historical)
-//   - Order management (send, cancel, replace, status)
-//   - Account info (positions, reports)
-//   - Reference data (instruments, segments)
-//
-// Reference: docs/primary-api.md
-//
-// Quickstart:
-//
-//	client, err := rofex.NewClient(
-//	    rofex.WithEnvironment(model.EnvironmentRemarket),
-//	    rofex.WithAuth(rofex.NewPasswordAuth(rofex.Credentials{
-//	        Username: "user",
-//	        Password: "pass",
-//	    })),
-//	)
 package rofex
 
 import (

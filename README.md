@@ -1,69 +1,15 @@
-# rofex-go - SDK de Go para la API de Primary (ROFEX)
+# rofex-go: SDK de Go para la API de Primary (MATBA ROFEX / BYMA)
 
-### WebSocket: guía rápida (Primary API)
+[![Go Reference](https://pkg.go.dev/badge/github.com/carvalab/rofex-go/rofex.svg)](https://pkg.go.dev/github.com/carvalab/rofex-go/rofex)
+[![CI](https://github.com/carvalab/rofex-go/actions/workflows/ci.yml/badge.svg)](https://github.com/carvalab/rofex-go/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/carvalab/rofex-go)](https://goreportcard.com/report/github.com/carvalab/rofex-go)
+[![Release](https://img.shields.io/github/v/release/carvalab/rofex-go)](https://github.com/carvalab/rofex-go/releases)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/carvalab/rofex-go)](go.mod)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-Esta sección resume los valores clave usados por la API WebSocket de Primary y su significado práctico.
+**Español** | [English](README.en.md)
 
-#### Tipos de mensaje (`type`)
-
-| Valor | Significado | Uso |
-| :--- | :--- | :--- |
-| `smd` | Subscribe Market Data | Suscribirse a cotizaciones en tiempo real |
-| `os`  | Order Subscription | Suscribirse a Execution Reports de órdenes |
-| `no`  | New Order | Enviar una nueva orden |
-| `co`  | Cancel Order | Cancelar una orden |
-
-Ejemplo de suscripción a Market Data:
-
-```json
-{
-  "type": "smd",
-  "level": 1,
-  "entries": ["OF"],
-  "products": [
-    {"symbol": "DLR/DIC23", "marketId": "ROFX"},
-    {"symbol": "SOJ.ROS/MAY23", "marketId": "ROFX"}
-  ],
-  "depth": 2
-}
-```
-
-#### Entradas de Market Data (`entries`)
-
-| Entry | Significado | Notas |
-| :--- | :--- | :--- |
-| `BI` | Mejor compra (BIDS) | Lista de niveles si depth > 1 |
-| `OF` | Mejor venta (OFFERS) | Lista de niveles si depth > 1 |
-| `LA` | Último precio operado (LAST) | Puede incluir size y date |
-| `OP` | Precio de apertura (OPEN) | Numérico |
-| `CL` | Precio de cierre (CLOSE) | Puede incluir {price,size,date} |
-| `SE` | Precio de ajuste (SETTLEMENT) | Futuros |
-| `HI` | Máximo de la rueda | Numérico |
-| `LO` | Mínimo de la rueda | Numérico |
-| `TV` | Volumen operado | Numérico |
-| `OI` | Interés abierto | Suele incluir size/date |
-| `IV` | Valor de índice | Índices |
-| `EV` | Volumen efectivo | ByMA |
-| `NV` | Volumen nominal | ByMA |
-| `ACP` | Precio de subasta del día | |
-| `TC` | Cantidad de trades | |
-
-#### Profundidad del libro (`depth`)
-
-- 1: Top of book (mejor BID/ASK). Menor ancho de banda/latencia. Valor por defecto.
-- 2..5: Hasta 5 niveles por lado. Más granularidad del libro, más datos a procesar.
-
-Ordenamiento de niveles (cuando depth > 1):
-- `BI` (compras): mejor → peor (precio descendente)
-- `OF` (ventas): mejor → peor (precio ascendente)
-
-Para más detalles ver `docs/primary-api.md`.
-
-![Go Version](https://img.shields.io/badge/Go-1.26+-blue.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
-![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)
-
-Un SDK completo y moderno en Go para interactuar con la API de trading de Primary (anteriormente ROFEX), el mercado de futuros y opciones líder de Argentina.
+SDK de Go para la API de trading de **Primary**, la que usan MATBA ROFEX y brokers como Eco Valores: market data por REST y WebSocket, órdenes, cuentas y riesgo, tanto en reMarkets (sandbox) como en producción. Es el equivalente en Go de [pyRofex](https://github.com/matbarofex/pyRofex).
 
 ## 🚀 Características
 
@@ -136,14 +82,13 @@ if err != nil {
     log.Fatal("Error obteniendo market data:", err)
 }
 
-fmt.Printf("Market Data para %s:\n", md.Instrument.Symbol)
-if len(md.MarketData.BI) > 0 {
-    fmt.Printf("Mejor Bid: $%.2f (Cantidad: %d)\n", 
-        md.MarketData.BI[0].Price, md.MarketData.BI[0].Size)
+if len(md.MarketData.Bids) > 0 {
+    fmt.Printf("Mejor Bid: $%.2f (Cantidad: %g)\n",
+        md.MarketData.Bids[0].Price, md.MarketData.Bids[0].Size)
 }
-if len(md.MarketData.OF) > 0 {
-    fmt.Printf("Mejor Offer: $%.2f (Cantidad: %d)\n",
-        md.MarketData.OF[0].Price, md.MarketData.OF[0].Size)
+if len(md.MarketData.Offers) > 0 {
+    fmt.Printf("Mejor Offer: $%.2f (Cantidad: %g)\n",
+        md.MarketData.Offers[0].Price, md.MarketData.Offers[0].Size)
 }
 ```
 
@@ -199,6 +144,66 @@ fmt.Printf("Orden cancelada. Cancel ID: %s\n", cancelResp.Order.ClientID)
 ```
 
 ## 📊 Streaming de Datos en Tiempo Real
+
+### WebSocket: guía rápida (Primary API)
+
+Esta sección resume los valores clave usados por la API WebSocket de Primary y su significado práctico.
+
+#### Tipos de mensaje (`type`)
+
+| Valor | Significado | Uso |
+| :--- | :--- | :--- |
+| `smd` | Subscribe Market Data | Suscribirse a cotizaciones en tiempo real |
+| `os`  | Order Subscription | Suscribirse a Execution Reports de órdenes |
+| `no`  | New Order | Enviar una nueva orden |
+| `co`  | Cancel Order | Cancelar una orden |
+
+Ejemplo de suscripción a Market Data:
+
+```json
+{
+  "type": "smd",
+  "level": 1,
+  "entries": ["OF"],
+  "products": [
+    {"symbol": "DLR/DIC23", "marketId": "ROFX"},
+    {"symbol": "SOJ.ROS/MAY23", "marketId": "ROFX"}
+  ],
+  "depth": 2
+}
+```
+
+#### Entradas de Market Data (`entries`)
+
+| Entry | Significado | Notas |
+| :--- | :--- | :--- |
+| `BI` | Mejor compra (BIDS) | Lista de niveles si depth > 1 |
+| `OF` | Mejor venta (OFFERS) | Lista de niveles si depth > 1 |
+| `LA` | Último precio operado (LAST) | Puede incluir size y date |
+| `OP` | Precio de apertura (OPEN) | Numérico |
+| `CL` | Precio de cierre (CLOSE) | Puede incluir {price,size,date} |
+| `SE` | Precio de ajuste (SETTLEMENT) | Futuros |
+| `HI` | Máximo de la rueda | Numérico |
+| `LO` | Mínimo de la rueda | Numérico |
+| `TV` | Volumen operado | Numérico |
+| `OI` | Interés abierto | Suele incluir size/date |
+| `IV` | Valor de índice | Índices |
+| `EV` | Volumen efectivo | ByMA |
+| `NV` | Volumen nominal | ByMA |
+| `ACP` | Precio de subasta del día | |
+| `TC` | Cantidad de trades | |
+
+#### Profundidad del libro (`depth`)
+
+- 1: Top of book (mejor BID/ASK). Menor ancho de banda/latencia. Valor por defecto.
+- 2..5: Hasta 5 niveles por lado. Más granularidad del libro, más datos a procesar.
+
+Ordenamiento de niveles (cuando depth > 1):
+- `BI` (compras): mejor → peor (precio descendente)
+- `OF` (ventas): mejor → peor (precio ascendente)
+
+Para más detalles ver `docs/primary-api.md`.
+
 
 ### Market Data en Tiempo Real
 
@@ -283,7 +288,7 @@ import "golang.org/x/time/rate"
 limiter := rate.NewLimiter(rate.Limit(10), 1) // 10 requests/segundo, burst=1
 
 client, err := rofex.NewClient(
-    rofex.WithRateLimit(limiter),
+    rofex.WithRateLimiter(limiter.Wait),
     // ... otras opciones
 )
 ```
@@ -470,25 +475,11 @@ if err != nil {
         fmt.Printf("Error HTTP %d: %s\n", httpErr.StatusCode, string(httpErr.Body))
         return
     }
-    var validationErr *rofex.ValidationError  
-    if errors.As(err, &validationErr) {
-        fmt.Printf("Error de validación en %s: %s\n", validationErr.Field, validationErr.Msg)
+    if errors.Is(err, rofex.ErrUnauthorized) {
+        fmt.Println("Error de autenticación: revisá usuario y contraseña")
         return
     }
-    var authErr *rofex.AuthError
-    if errors.As(err, &authErr) {
-        fmt.Printf("Error de autenticación: %s\n", authErr.Msg)
-        // Reintenta con credenciales nuevas
-        return
-    }
-    var tempErr *rofex.TemporaryError
-    if errors.As(err, &tempErr) {
-        fmt.Printf("Error temporal: %s - reintenta en unos segundos\n", tempErr.Error())
-        time.Sleep(5 * time.Second)
-        // Reintenta la operación
-        return
-    }
-    fmt.Printf("Error no categorizado: %v\n", err)
+    fmt.Printf("Error: %v\n", err)
 }
 ```
 
