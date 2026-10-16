@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/carvalab/rofex-go/rofex/model"
@@ -30,28 +31,61 @@ type Credentials struct {
 }
 
 // PasswordAuth implements AuthProvider via the Primary X-Username/X-Password login that yields X-Auth-Token.
+// It is safe for concurrent use: concurrent refreshes share a single login.
 type PasswordAuth struct {
-	cred  Credentials
-	token string
+	cred Credentials
+
+	mu       sync.Mutex
+	token    string
+	inflight chan struct{} // closed when the in-progress login finishes
+	lastErr  error
 }
 
 func NewPasswordAuth(cred Credentials) *PasswordAuth { return &PasswordAuth{cred: cred} }
 
+func (a *PasswordAuth) currentToken() string {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.token
+}
+
 func (a *PasswordAuth) Apply(req *http.Request) error {
-	if a.token == "" {
+	token := a.currentToken()
+	if token == "" {
 		return ErrUnauthorized
 	}
-	req.Header.Set("X-Auth-Token", a.token)
+	req.Header.Set("X-Auth-Token", token)
 	return nil
 }
 
 func (a *PasswordAuth) Refresh(ctx context.Context, c *Client) error {
-	token, err := c.login(ctx, a.cred)
-	if err != nil {
-		return err
+	a.mu.Lock()
+	if done := a.inflight; done != nil {
+		a.mu.Unlock()
+		select {
+		case <-done:
+			a.mu.Lock()
+			defer a.mu.Unlock()
+			return a.lastErr
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
-	a.token = token
-	return nil
+	done := make(chan struct{})
+	a.inflight = done
+	a.mu.Unlock()
+
+	token, err := c.login(ctx, a.cred)
+
+	a.mu.Lock()
+	if err == nil {
+		a.token = token
+	}
+	a.lastErr = err
+	a.inflight = nil
+	a.mu.Unlock()
+	close(done)
+	return err
 }
 
 // StaticTokenAuth uses a pre-obtained token.
@@ -249,12 +283,12 @@ func (c *Client) doGET(ctx context.Context, path string) (*http.Response, error)
 func (c *Client) wsAuthToken(ctx context.Context) (string, error) {
 	switch a := c.auth.(type) {
 	case *PasswordAuth:
-		if a.token == "" {
+		if a.currentToken() == "" {
 			if err := a.Refresh(ctx, c); err != nil {
 				return "", err
 			}
 		}
-		return a.token, nil
+		return a.currentToken(), nil
 	case *StaticTokenAuth:
 		if a.token == "" {
 			return "", ErrUnauthorized

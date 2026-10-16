@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -39,7 +40,6 @@ type MarketDataSubscription struct {
 	Errs   <-chan error
 	Close  func() error
 
-	conn    *StreamConnection
 	symbols []string
 	entries []model.MDEntry
 	depth   int
@@ -54,7 +54,6 @@ type OrderReportSubscription struct {
 	Errs   <-chan error
 	Close  func() error
 
-	conn               *StreamConnection
 	account            string
 	snapshotOnlyActive bool
 }
@@ -209,6 +208,7 @@ func (c *Client) SubscribeMarketData(ctx context.Context, symbols []string, entr
 		market:  market,
 	}
 
+	ctx, cancel := context.WithCancel(ctx)
 	go runSubscription(ctx, c,
 		func() (*StreamConnection, any, error) {
 			token, err := c.wsAuthToken(ctx)
@@ -216,22 +216,18 @@ func (c *Client) SubscribeMarketData(ctx context.Context, symbols []string, entr
 				return nil, nil, fmt.Errorf("auth token error: %w", err)
 			}
 			headers := http.Header{"X-Auth-Token": []string{token}}
-			conn := c.NewStreamConnection(ctx, c.wsURL, headers)
-			sub.conn = conn
-			return conn, subMsg, nil
+			return c.NewStreamConnection(ctx, c.wsURL, headers), subMsg, nil
 		},
 		func(ctx context.Context, conn *StreamConnection) error {
-			return readEvents(ctx, c, conn, eventsChan, errsChan, model.WSMessageMarketData, func(e *model.MarketDataEvent) {
-				e.Type = model.WSMessageType(strings.ToLower(string(e.Type)))
+			return readEvents(ctx, c, conn, eventsChan, func(e *model.MarketDataEvent) bool {
+				return model.WSMessageType(strings.ToLower(string(e.Type))) == model.WSMessageMarketData
 			})
 		},
 		eventsChan, errsChan,
 	)
 
 	sub.Close = func() error {
-		if sub.conn != nil {
-			return sub.conn.Disconnect()
-		}
+		cancel()
 		return nil
 	}
 	return sub, nil
@@ -269,6 +265,7 @@ func (c *Client) SubscribeOrderReport(ctx context.Context, account string, snaps
 		snapshotOnlyActive: snapshotOnlyActive,
 	}
 
+	ctx, cancel := context.WithCancel(ctx)
 	go runSubscription(ctx, c,
 		func() (*StreamConnection, any, error) {
 			token, err := c.wsAuthToken(ctx)
@@ -276,22 +273,18 @@ func (c *Client) SubscribeOrderReport(ctx context.Context, account string, snaps
 				return nil, nil, fmt.Errorf("auth token error: %w", err)
 			}
 			headers := http.Header{"X-Auth-Token": []string{token}}
-			conn := c.NewStreamConnection(ctx, c.wsURL, headers)
-			sub.conn = conn
-			return conn, subMsg, nil
+			return c.NewStreamConnection(ctx, c.wsURL, headers), subMsg, nil
 		},
 		func(ctx context.Context, conn *StreamConnection) error {
-			return readEvents(ctx, c, conn, eventsChan, errsChan, model.WSMessageOrderReport, func(e *model.OrderReportEvent) {
-				e.Type = model.WSMessageType(strings.ToLower(string(e.Type)))
+			return readEvents(ctx, c, conn, eventsChan, func(e *model.OrderReportEvent) bool {
+				return model.WSMessageType(strings.ToLower(string(e.Type))) == model.WSMessageOrderReport
 			})
 		},
 		eventsChan, errsChan,
 	)
 
 	sub.Close = func() error {
-		if sub.conn != nil {
-			return sub.conn.Disconnect()
-		}
+		cancel()
 		return nil
 	}
 	return sub, nil
@@ -345,17 +338,20 @@ func runSubscription[T any](
 		}
 
 		if err := readLoop(ctx, conn); err != nil {
+			conn.Disconnect()
+			if ctx.Err() != nil {
+				return
+			}
 			if c.logger != nil {
 				c.logger.Debug("connection lost, attempting reconnect", slog.Any("err", err))
 			}
-			conn.Disconnect()
-
 			if !isRecoverable(err) {
 				c.sendErr(errs, ctx, err)
 				return
 			}
-
-			time.Sleep(backoff)
+			if !sleepCtx(ctx, backoff) {
+				return
+			}
 			if backoff < maxBackoff {
 				backoff *= 2
 			}
@@ -364,16 +360,14 @@ func runSubscription[T any](
 }
 
 // readEvents drives the websocket read loop for a single connection session:
-// lowercases the message type, drops events whose type doesn't match the
-// expected one, and forwards matching events to eventsChan (drop-on-full or block).
+// it drops messages for which keep returns false (other message types, server
+// errors) and forwards the rest to eventsChan (drop-on-full or block).
 func readEvents[T any](
 	ctx context.Context,
 	c *Client,
 	conn *StreamConnection,
 	eventsChan chan<- *T,
-	errs chan<- error,
-	wantType model.WSMessageType,
-	normalize func(*T),
+	keep func(*T) bool,
 ) error {
 	connCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -388,11 +382,7 @@ func readEvents[T any](
 		if err := conn.ReadJSON(connCtx, &ev); err != nil {
 			return err
 		}
-		if normalize != nil {
-			normalize(&ev)
-		}
-		// Skip non-matching event types without breaking the loop.
-		if !eventMatches(&ev, wantType) {
+		if !keep(&ev) {
 			continue
 		}
 		if c.wsDropOnFull {
@@ -411,18 +401,6 @@ func readEvents[T any](
 			}
 		}
 	}
-}
-
-// eventMatches returns true if the WS event's Type equals wantType.
-// T must be a struct with a `Type model.WSMessageType` field (MarketDataEvent,
-// OrderReportEvent). We use a type assertion to read it; if T doesn't match,
-// we forward the event (fail-open) to preserve generic semantics.
-func eventMatches[T any](ev *T, want model.WSMessageType) bool {
-	type t interface{ Type() model.WSMessageType }
-	if e, ok := any(ev).(t); ok {
-		return e.Type() == want
-	}
-	return true
 }
 
 // keepAlive sends periodic pings to keep the connection alive.
@@ -454,7 +432,7 @@ func isRecoverable(err error) bool {
 	}
 	if status := websocket.CloseStatus(err); status != -1 {
 		switch status {
-		case websocket.StatusNormalClosure, websocket.StatusGoingAway:
+		case websocket.StatusNormalClosure:
 			return false
 		default:
 			return true
@@ -463,6 +441,18 @@ func isRecoverable(err error) bool {
 	return errors.Is(err, io.EOF) ||
 		errors.Is(err, net.ErrClosed) ||
 		isNetOpError(err)
+}
+
+// sleepCtx waits for d or until ctx is done; it reports whether the full wait elapsed.
+func sleepCtx(ctx context.Context, d time.Duration) bool {
+	t := time.NewTimer(d)
+	defer t.Stop()
+	select {
+	case <-t.C:
+		return true
+	case <-ctx.Done():
+		return false
+	}
 }
 
 func isNetOpError(err error) bool {
@@ -488,7 +478,7 @@ func (c *Client) sleepAndBackoff(errs chan<- error, ctx context.Context, err err
 			slog.Duration("backoff", *backoff))
 	}
 	c.sendErr(errs, ctx, err)
-	time.Sleep(*backoff)
+	sleepCtx(ctx, *backoff)
 	if *backoff < max {
 		*backoff *= 2
 	}
@@ -547,7 +537,7 @@ func (c *Client) SendOrderWS(ctx context.Context, o NewOrder) error {
 	}
 
 	if o.Price != nil && o.Type == model.OrderTypeLimit {
-		priceStr := fmt.Sprintf("%v", *o.Price)
+		priceStr := strconv.FormatFloat(*o.Price, 'f', -1, 64)
 		orderMsg.Price = &priceStr
 	}
 	if o.Iceberg && o.DisplayQty != nil {
