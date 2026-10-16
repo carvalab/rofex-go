@@ -151,7 +151,7 @@ func NewClient(opts ...Option) (*Client, error) {
 		wsURL:        "wss://api.remarkets.primary.com.ar/",
 		http:         &http.Client{Timeout: 15 * time.Second},
 		rateLimit:    noWait,
-		userAgent:    "rofex-go/0.1.0 (+https://github.com/carvalab/rofex-go)",
+		userAgent:    defaultUserAgent(),
 		timeout:      15 * time.Second,
 		proprietary:  "PBCP",
 		wsBuf:        128,
