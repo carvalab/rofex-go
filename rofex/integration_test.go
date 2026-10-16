@@ -15,8 +15,10 @@ package rofex
 
 import (
 	"context"
+	"errors"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -41,6 +43,7 @@ func integrationClient(t *testing.T) (*Client, model.Environment) {
 		WithEnvironment(env),
 		WithAuth(NewPasswordAuth(Credentials{Username: user, Password: pass})),
 		WithTimeout(30 * time.Second),
+		WithRateLimiter(spacedLimiter(time.Second)), // stay under the broker's per-endpoint limits
 	}
 	if env == model.EnvironmentLive {
 		opts = append(opts,
@@ -53,6 +56,27 @@ func integrationClient(t *testing.T) (*Client, model.Environment) {
 		t.Fatalf("new client: %v", err)
 	}
 	return c, env
+}
+
+// spacedLimiter lets one request through every interval.
+func spacedLimiter(interval time.Duration) WaitFunc {
+	var mu sync.Mutex
+	var next time.Time
+	return func(ctx context.Context) error {
+		mu.Lock()
+		wait := time.Until(next)
+		if wait < 0 {
+			wait = 0
+		}
+		next = time.Now().Add(wait + interval)
+		mu.Unlock()
+		select {
+		case <-time.After(wait):
+			return nil
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
 }
 
 func envOr(k, def string) string {
@@ -186,5 +210,28 @@ func TestIntegration_MarketData(t *testing.T) {
 		case <-timeout:
 			t.Fatal("ws: no market data event within 45s")
 		}
+	}
+}
+
+// Primary answers business errors with HTTP 200 + "status":"ERROR"; the SDK
+// must turn them into *APIError.
+func TestIntegration_APIError(t *testing.T) {
+	c, _ := integrationClient(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	_, err := c.MarketDataSnapshot(ctx, MDRequest{Symbol: "NOPE/XX99", Market: model.MarketROFEX, Entries: []model.MDEntry{model.MDLast}})
+	var apiErr *APIError
+	if !errors.As(err, &apiErr) {
+		t.Fatalf("unknown symbol: want *APIError, got %v", err)
+	}
+	if !strings.Contains(apiErr.Description, "NOPE/XX99") {
+		t.Errorf("unexpected api error: %v", apiErr)
+	}
+
+	// Without entries the SDK requests a sensible default instead of failing.
+	id := pickSymbol(t, ctx, c, model.EnvironmentLive)
+	if _, err := c.MarketDataSnapshot(ctx, MDRequest{Symbol: id.Symbol, Market: model.Market(id.MarketID)}); err != nil {
+		t.Errorf("snapshot without entries: %v", err)
 	}
 }

@@ -467,8 +467,16 @@ type NewOrder struct {
 ## ⚠️ Buenas Prácticas
 
 ### 1. Manejo de Errores
+> Primary responde los errores de negocio con HTTP 200 y `"status":"ERROR"`. Desde v0.4.0 el SDK los devuelve como `*rofex.APIError`, así que `if err != nil` detecta una orden rechazada.
+
 ```go
 if err != nil {
+    var apiErr *rofex.APIError
+    if errors.As(err, &apiErr) {
+        // Primary rechazó el pedido (orden rechazada, símbolo inexistente, sin acceso a la cuenta)
+        fmt.Println(apiErr.Message, apiErr.Description)
+        return
+    }
     var httpErr *rofex.HTTPError
     if errors.As(err, &httpErr) {
         fmt.Printf("Error HTTP %d: %s\n", httpErr.StatusCode, string(httpErr.Body))

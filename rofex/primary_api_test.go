@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/carvalab/rofex-go/rofex/model"
+	"github.com/coder/websocket"
 )
 
 func TestSendOrder_PathParams_UppercaseAndOptionals(t *testing.T) {
@@ -411,5 +412,30 @@ func TestMarketDataSnapshot_SymbolWithSpacesIsEscaped(t *testing.T) {
 
 	if _, err := c.MarketDataSnapshot(ctx, MDRequest{Symbol: symbol, Market: model.MarketROFEX}); err != nil {
 		t.Fatalf("MarketDataSnapshot: %v", err)
+	}
+}
+
+// Primary rejects market data requests without entries; the SDK must default them.
+func TestMarketData_DefaultEntries(t *testing.T) {
+	c, last := jsonServer(t, http.StatusOK, `{"status":"OK","marketData":{}}`)
+	if _, err := c.MarketDataSnapshot(context.Background(), MDRequest{Symbol: "DLR/DIC26"}); err != nil {
+		t.Fatal(err)
+	}
+	if got := last.Query().Get("entries"); got != "BI,OF,LA" {
+		t.Errorf("REST entries = %q, want BI,OF,LA", got)
+	}
+
+	f := newFakePrimaryWS(t, func(n int32, ctx context.Context, conn *websocket.Conn) { <-ctx.Done() })
+	ws, _ := NewClient(WithWSURL(f.wsURL), WithStaticToken("tok"))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	sub, err := ws.SubscribeMarketData(ctx, []string{"DLR/DIC26"}, nil, 1, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sub.Close()
+	m := <-f.subs
+	if e, _ := m["entries"].([]any); len(e) != 3 || e[0] != "BI" || e[1] != "OF" || e[2] != "LA" {
+		t.Errorf("WS entries = %v, want [BI OF LA]", m["entries"])
 	}
 }

@@ -466,8 +466,16 @@ type NewOrder struct {
 ## ⚠️ Best Practices
 
 ### 1. Error Handling
+> Primary reports business errors as HTTP 200 with `"status":"ERROR"`. Since v0.4.0 the SDK returns them as `*rofex.APIError`, so `if err != nil` catches a rejected order.
+
 ```go
 if err != nil {
+    var apiErr *rofex.APIError
+    if errors.As(err, &apiErr) {
+        // Primary rejected the request (rejected order, unknown symbol, no access to the account)
+        fmt.Println(apiErr.Message, apiErr.Description)
+        return
+    }
     var httpErr *rofex.HTTPError
     if errors.As(err, &httpErr) {
         fmt.Printf("HTTP error %d: %s\n", httpErr.StatusCode, string(httpErr.Body))

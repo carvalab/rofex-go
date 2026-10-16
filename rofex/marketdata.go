@@ -38,7 +38,7 @@ type MDRequest struct {
 //   - NV: Volumen nominal (solo instrumentos ByMA)
 //   - ACP: Precio de cierre del día corriente
 //
-// El parámetro depth indica la profundidad del book (1-5), por defecto 1.
+// Sin Entries se piden BI, OF y LA. El parámetro depth indica la profundidad del book (1-5), por defecto 1.
 //
 // Referencia: docs/primary-api.md - "MarketData en tiempo real a través de REST"
 func (c *Client) MarketDataSnapshot(ctx context.Context, req MDRequest) (model.MarketDataSnapshotResponse, error) {
@@ -54,7 +54,7 @@ func (c *Client) MarketDataSnapshot(ctx context.Context, req MDRequest) (model.M
 	q := url.Values{
 		"marketId": {string(req.Market)},
 		"symbol":   {req.Symbol},
-		"entries":  {joinEntries(req.Entries)},
+		"entries":  {joinEntries(entriesOrDefault(req.Entries))},
 		"depth":    {strconv.Itoa(req.Depth)},
 	}
 	path := pathMDGet + "?" + q.Encode()

@@ -9,6 +9,17 @@ import (
 )
 
 // helper to join entries to comma list for query
+// defaultEntries is used when a market data request names no entries:
+// Primary rejects requests without them.
+var defaultEntries = []model.MDEntry{model.MDBids, model.MDOffers, model.MDLast}
+
+func entriesOrDefault(entries []model.MDEntry) []model.MDEntry {
+	if len(entries) == 0 {
+		return defaultEntries
+	}
+	return entries
+}
+
 func joinEntries(entries []model.MDEntry) string {
 	out := make([]string, 0, len(entries))
 	for _, e := range entries {

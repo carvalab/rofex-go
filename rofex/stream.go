@@ -162,6 +162,7 @@ func (sc *StreamConnection) Ping(ctx context.Context) error {
 
 // SubscribeMarketData subscribes to real-time MarketData via WebSocket.
 //
+// Without entries, BI, OF and LA are requested.
 // Depth is the order-book depth requested: 1 = top of book (default), 2..5 = multiple
 // levels per side (Primary API limit).
 //
@@ -190,7 +191,7 @@ func (c *Client) SubscribeMarketData(ctx context.Context, symbols []string, entr
 		Type:    model.WSMessageSubscribeMarketData,
 		Level:   1,
 		Depth:   depth,
-		Entries: entries,
+		Entries: entriesOrDefault(entries),
 	}
 	for _, symbol := range symbols {
 		subMsg.Products = append(subMsg.Products, map[string]string{

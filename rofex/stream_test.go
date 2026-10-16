@@ -3,6 +3,7 @@ package rofex
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -207,5 +208,178 @@ func TestSubscribeOrderReport_SubscribesAccountAndForwardsReports(t *testing.T) 
 	ev := waitEvent(t, sub.Events)
 	if ev.OrderReport.ClOrdID != "ID1" {
 		t.Errorf("order report: %+v", ev.OrderReport)
+	}
+}
+
+// Subscribing before any REST call must log in first and use that token.
+// The order report timestamp (ms) must convert to the right instant.
+func TestSubscribe_LogsInWithPasswordAuth(t *testing.T) {
+	var gotToken atomic.Value
+	mux := http.NewServeMux()
+	mux.HandleFunc("/auth/getToken", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Auth-Token", "fresh-token")
+	})
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		gotToken.Store(r.Header.Get("X-Auth-Token"))
+		conn, err := websocket.Accept(w, r, nil)
+		if err != nil {
+			return
+		}
+		defer conn.CloseNow()
+		ctx := r.Context()
+		_, _, _ = conn.Read(ctx)
+		ctx = conn.CloseRead(ctx)
+		send(ctx, conn, `{"type":"or","timestamp":1760630400123,"orderReport":{"clOrdId":"ID1"}}`)
+		<-ctx.Done()
+	})
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
+
+	c, _ := NewClient(WithBaseURL(ts.URL+"/"), WithWSURL("ws"+strings.TrimPrefix(ts.URL, "http")+"/"),
+		WithAuth(NewPasswordAuth(Credentials{Username: "u", Password: "p"})))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	sub, err := c.SubscribeOrderReport(ctx, "REM1", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sub.Close()
+
+	ev := waitEvent(t, sub.Events)
+	if gotToken.Load() != "fresh-token" {
+		t.Errorf("ws token = %v", gotToken.Load())
+	}
+	if ht := ev.HumanTime(); ht == nil || ht.UnixMilli() != 1760630400123 {
+		t.Errorf("HumanTime = %v", ht)
+	}
+}
+
+func waitErr(t *testing.T, ch <-chan error) error {
+	t.Helper()
+	select {
+	case err := <-ch:
+		return err
+	case <-time.After(5 * time.Second):
+		t.Fatal("timeout waiting for error")
+		return nil
+	}
+}
+
+func waitClosed[T any](t *testing.T, ch <-chan *T) {
+	t.Helper()
+	select {
+	case _, ok := <-ch:
+		if ok {
+			t.Fatal("unexpected event")
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("events channel not closed")
+	}
+}
+
+// Wrong credentials end the subscription with a visible error instead of
+// retrying forever.
+func TestSubscribe_AuthFailureIsReported(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+	}))
+	defer ts.Close()
+
+	c, _ := NewClient(WithBaseURL(ts.URL+"/"), WithWSURL("ws"+strings.TrimPrefix(ts.URL, "http")+"/"),
+		WithAuth(NewPasswordAuth(Credentials{Username: "u", Password: "bad"})))
+	sub, err := c.SubscribeMarketData(context.Background(), []string{"DLR/DIC26"}, nil, 1, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var httpErr *HTTPError
+	if err := waitErr(t, sub.Errs); !errors.As(err, &httpErr) || httpErr.StatusCode != http.StatusUnauthorized {
+		t.Errorf("want 401 error, got %v", err)
+	}
+	waitClosed(t, sub.Events)
+}
+
+// If the server is down when the bot starts, the subscription reports the
+// failure and keeps retrying until it can connect.
+func TestSubscribe_RetriesUntilServerIsUp(t *testing.T) {
+	var attempts atomic.Int32
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if attempts.Add(1) == 1 {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
+		conn, err := websocket.Accept(w, r, nil)
+		if err != nil {
+			return
+		}
+		defer conn.CloseNow()
+		_, _, _ = conn.Read(r.Context())
+		ctx := conn.CloseRead(r.Context())
+		send(ctx, conn, mdMsg("DLR/DIC26", 1))
+		<-ctx.Done()
+	}))
+	defer ts.Close()
+
+	c, _ := NewClient(WithWSURL("ws"+strings.TrimPrefix(ts.URL, "http")+"/"), WithStaticToken("tok"))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	sub, err := c.SubscribeMarketData(ctx, []string{"DLR/DIC26"}, nil, 1, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sub.Close()
+
+	if err := waitErr(t, sub.Errs); !strings.Contains(err.Error(), "dial failed") {
+		t.Errorf("want dial error, got %v", err)
+	}
+	waitEvent(t, sub.Events)
+}
+
+// A normal close from the server (session ended) is reported and not retried.
+func TestSubscribe_ServerEndsSession(t *testing.T) {
+	f := newFakePrimaryWS(t, func(n int32, ctx context.Context, conn *websocket.Conn) {
+		_ = conn.Close(websocket.StatusNormalClosure, "session ended")
+	})
+	c, _ := NewClient(WithWSURL(f.wsURL), WithStaticToken("tok"))
+	sub, err := c.SubscribeMarketData(context.Background(), []string{"DLR/DIC26"}, nil, 1, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := waitErr(t, sub.Errs); websocket.CloseStatus(err) != websocket.StatusNormalClosure {
+		t.Errorf("want normal closure error, got %v", err)
+	}
+	waitClosed(t, sub.Events)
+	if n := f.conns.Load(); n != 1 {
+		t.Errorf("reconnected %d times after session end", n-1)
+	}
+}
+
+// With drop-on-full, a slow consumer loses old quotes but never stalls the
+// feed: the next quote still arrives.
+func TestSubscribe_SlowConsumerDropOnFull(t *testing.T) {
+	more := make(chan struct{})
+	f := newFakePrimaryWS(t, func(n int32, ctx context.Context, conn *websocket.Conn) {
+		for i := range 20 {
+			send(ctx, conn, mdMsg("DLR/DIC26", float64(i)))
+		}
+		<-more
+		send(ctx, conn, mdMsg("DLR/DIC26", 999))
+		<-ctx.Done()
+	})
+	c, _ := NewClient(WithWSURL(f.wsURL), WithStaticToken("tok"), WithWSBuffer(1), WithWSDropOnFull(true))
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	sub, err := c.SubscribeMarketData(ctx, []string{"DLR/DIC26"}, nil, 1, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sub.Close()
+
+	time.Sleep(300 * time.Millisecond) // let the 20 quotes arrive while nobody reads
+	if ev := waitEvent(t, sub.Events); ev.MarketData.Bids[0].Price != 0 {
+		t.Errorf("buffered quote %v, want the first one", ev.MarketData.Bids[0].Price)
+	}
+	close(more)
+	if ev := waitEvent(t, sub.Events); ev.MarketData.Bids[0].Price != 999 {
+		t.Errorf("after draining got %v, want 999 (feed stalled or old quotes kept)", ev.MarketData.Bids[0].Price)
 	}
 }
